@@ -1,7 +1,7 @@
 # Kinwoven — Devpost project story
 
 Verified November 15, 2026. Public source: https://github.com/yablokolabs/kinwoven (MIT).
-Live app: https://kinwoven-proof.web.app. Demo: [2:40 film](media/kinwoven-demo.mp4).
+Live app: https://kinwoven-proof.web.app. Demo: [2:43 film](media/kinwoven-demo.mp4).
 
 ## Inspiration
 
@@ -29,7 +29,7 @@ Two separate live runs were captured on the deployed app.
 - Cloud: the same deployed app produced `Cloud draft · gemini-3.5-flash-lite · 3.4s · prompt kinwoven-draft-v3 · App Check on`, and the story included the family's tea-and-radio answer.
 - App Check: replaying the same live request without the `X-Firebase-AppCheck` header returned 401 `UNAUTHENTICATED`; the request with the token returned 200. Token values stayed in browser memory and are not in the evidence.
 
-Evidence: `docs/media/runtime-proof-v3.json`, `docs/media/on-device-live-v3.png` and `docs/media/cloud-live-v3.png`. The 2:40 film includes a dedicated 30-second on-device chapter with the real wait, the returned draft and a zero cloud-request count.
+Evidence: `docs/media/runtime-proof-v3.json`, `docs/media/on-device-live-v3.png` and `docs/media/cloud-live-v3.png`. The 2:43 film includes a dedicated 30-second on-device chapter with the real wait, the returned draft and a zero cloud-request count.
 
 The inspected Chrome runtime reports `v3Nano` 2025.08.14.1358, component 2025.8.21.1028. No inspected manifest or API response labels it "Gemini Nano 4"; equivalence with that marketing name is not established and is not claimed.
 
