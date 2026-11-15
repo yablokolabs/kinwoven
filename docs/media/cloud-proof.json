@@ -1,0 +1,68 @@
+{
+  "kind": "redacted cloud runtime proof",
+  "capturedAt": "2026-11-15T11:51:26Z",
+  "url": "https://kinwoven-proof.web.app",
+  "projectId": "kinwoven-proof",
+  "deployment": {
+    "only": "hosting",
+    "files": 23,
+    "size": "1.5 MB",
+    "build": "npm run build exit 0"
+  },
+  "appCheck": {
+    "provider": "reCAPTCHA Enterprise",
+    "exchangeStatus": 200,
+    "tokenReturned": true,
+    "tokenValueStored": false,
+    "ttl": "86400s",
+    "geminiRequestHeaderPresent": "X-Firebase-AppCheck"
+  },
+  "appCheckRejection": {
+    "testedAt": "2026-11-15T11:57:00Z",
+    "method": "replayed the same Gemini request body and headers without X-Firebase-AppCheck",
+    "enforcementChanged": false,
+    "status": 401,
+    "errorStatus": "UNAUTHENTICATED",
+    "message": "Firebase App Check token is invalid."
+  },
+  "gemini": {
+    "endpoint": "firebasevertexai.googleapis.com/v1beta/projects/kinwoven-proof/models/gemini-3.5-flash-lite:generateContent",
+    "status": 200,
+    "modelVersion": "gemini-3.5-flash-lite",
+    "finishReason": "STOP",
+    "responseTextLength": 413
+  },
+  "ui": {
+    "provenance": "Cloud draft \u00b7 gemini-3.5-flash-lite \u00b7 2.9s \u00b7 prompt kinwoven-draft-v2 \u00b7 App Check on",
+    "status": "Drafted in the cloud in 2.9s with App Check.",
+    "source": "IN_CLOUD"
+  },
+  "fixture": {
+    "label": "synthetic test fixture",
+    "photo": "assets/generated/kitchen-table.jpg",
+    "notes": [
+      "The table was in the kitchen",
+      "We ate there every Sunday",
+      "The blue bowl held apples"
+    ],
+    "answer": "The tea was still warm when the radio played our song."
+  },
+  "changesNotMade": [
+    "billing was not enabled",
+    "App Check enforcement was not disabled",
+    "no services other than Hosting were deployed"
+  ],
+  "promptRegression": {
+    "cause": "The v2 prompt included the answer text but defined only the note facts as supplied facts and told the model not to use anything outside 'the facts above'. The model treated the separately labeled answer as outside that set.",
+    "fix": "Prompt v3 labels the answer as a confirmed fact, requires it in the story, and forbids moving it into uncertain.",
+    "test": "src/lib/prompt.test.ts"
+  },
+  "notProven": [
+    "anonymous sign-in, Firestore and Storage publishing remain unproven",
+    "semantic factuality of model drafts remains unproven",
+    "this file is a v2-era capture; current v3 evidence is docs/media/runtime-proof-v3.json"
+  ],
+  "historical": true,
+  "supersededBy": "docs/media/runtime-proof-v3.json",
+  "supersededNote": "v2-era capture. The live deployment now runs prompt kinwoven-draft-v3; use runtime-proof-v3.json for current evidence."
+}

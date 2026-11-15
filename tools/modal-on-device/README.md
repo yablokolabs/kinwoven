@@ -1,119 +1,122 @@
-# Reproduce the on-device proof
+# Reproduce the Kinwoven runtime proof
 
-This is the setup behind `docs/media/on-device-modal.png`. It proves Chrome-local
-inference in a Modal Linux CPU container. It does **not** prove execution on a
-family laptop, cloud inference, App Check, or a real Firebase project.
+This runbook reproduces the v3 evidence in `docs/media/runtime-proof-v3.json`. It proves Chrome-local
+inference and the opt-in cloud path on the live app. It does **not** prove execution on a family
+laptop, and it does not exercise sign-in, Firestore or Storage.
 
 ## What the scripts do
 
-`probe.py` has three Modal functions:
+`probe.py` has five Modal functions:
 
 - `version_probe` prints the Chrome and Playwright versions.
-- `raw_probe` creates the Chrome Prompt API session, runs a prompt online, then
-  repeats it with the browser offline. It records `raw-evidence.json`.
-- `app_probe` drives the actual Kinwoven UI through photo, notes, question and a
-  local-only draft. It records the rendered provenance, the network trace during
-  the draft, `app-evidence.json` and a full-page screenshot.
+- `raw_probe` creates a raw Chrome Prompt API session, runs a prompt online, then repeats it offline.
+- `app_probe` is the older placeholder-Firebase build check. It is kept for the v2 historical
+  evidence and is not the current live proof.
+- `live_app_probe` opens https://kinwoven-proof.web.app in the persistent Chrome profile, drives the
+  on-device flow, records the provenance and network trace, and writes `ondevice-live.webm`,
+  `ondevice-live.png` and `ondevice-live-evidence.json`.
+- `cloud_probe` opens the live app in the separate fresh profile `/data/cloud-profile`, selects the
+  cloud option, and writes `cloud-live.webm`, `cloud-live.png` and `cloud-live-evidence.json`.
 
-The app probe uses a synthetic kitchen-table photo and notes. The draft prompt
-is the current `kinwoven-draft-v2`; the model may still add a detail, so the
-screenshot can include the app's "Check before approving" review card.
+The scripts use the synthetic kitchen-table fixture in `assets/generated/`. The current prompt is
+`kinwoven-draft-v3`. The on-device model can still add wording; the app's review card flags a short
+word list, but it is not a semantic checker.
 
 ## Prerequisites
 
 - A Modal account and `modal` CLI. The recorded run used `modal==1.6.4`.
 - Node 22 and the project dependencies.
-- No GPU. The functions request 8 CPU and 32 GB memory, and the recorded
-  container reported 24 vCPU and 171.83 GiB visible memory.
-- The Modal profile volume `kinwoven-chrome-profile`. The functions create it if
-  missing; keeping it avoids downloading the model again.
+- A real `.env.local` with the public Firebase web values and the reCAPTCHA Enterprise App Check site
+  key. Keep it untracked. Do not use secrets in the browser build.
+- No GPU. The functions request 8 CPU and 32 GB memory. The recorded container reported 24 vCPU and
+  396.47 GiB visible memory.
+- The Modal volume `kinwoven-chrome-profile`. Keeping it avoids downloading the model again. The
+  on-device profile is `/data/profile`; the cloud fallback profile is `/data/cloud-profile` and must
+  not contain the on-device model.
 
-Authenticate Modal in the environment where you run the commands. Do not commit
-Modal tokens.
+Authenticate Modal in the environment where you run the commands. Do not commit Modal tokens or the
+Firebase/App Check values.
 
-## 1. Build a test-only app
-
-The on-device path needs Firebase AI Logic initialization, but it does not need a
-real Firebase project. Use placeholder identifiers only for the local proof. Do
-not use this build for cloud calls or deployment.
+## 1. Build and deploy the app
 
 ```bash
-cat > .env.test.local <<'EOF'
-VITE_FIREBASE_API_KEY=test-only-placeholder
-VITE_FIREBASE_AUTH_DOMAIN=test-only.invalid
-VITE_FIREBASE_PROJECT_ID=test-only-placeholder
-VITE_FIREBASE_STORAGE_BUCKET=test-only.invalid
-VITE_FIREBASE_MESSAGING_SENDER_ID=000000000000
-VITE_FIREBASE_APP_ID=1:000000000000:web:test-only
-VITE_APPCHECK_SITE_KEY=
-VITE_APPCHECK_DEBUG=false
-EOF
 npm run typecheck
-npx vite build --mode test
-rm .env.test.local
+npm test -- --run
+npm run build
+firebase deploy --only hosting --project kinwoven-proof --non-interactive
 ```
 
-`.env.test.local` is ignored by Git. Confirm the build contains the placeholder
-project id and no real credentials before uploading it to Modal.
+The Modal image uploads the current `dist/` and `assets/generated/`; deploy the same build to Hosting
+so the live URL and the uploaded files match. No Firestore, Storage, Functions, billing or App Check
+enforcement change is needed.
 
-## 2. Warm and prove the raw Chrome model
+## 2. Prove on-device execution
 
 ```bash
-modal run tools/modal-on-device/probe.py::version_probe
-modal run tools/modal-on-device/probe.py::raw_probe
+modal run tools/modal-on-device/probe.py::live_app_probe
 ```
 
-The first model download can take several minutes. The function waits for the
-download, then runs the raw prompt online and offline. A pass requires
-`availability` to be `downloadable` or `available`, and both `online.text` and
-`offline.text` to be `local-ready`.
-
-The recorded environment used:
-
-- **Chrome:** `Google Chrome 157.0.8103.78`
-- **Playwright:** `1.55.0`
-- **Display:** Xvfb `:99`, `1920x1080x24`
-- **Backend:** CPU, with `OnDeviceModelForceCpuBackend`
-- **Profile:** persistent volume mounted at `/data/profile`
-- **Model:** v3Nano `2025.08.14.1358`, component `2025.8.21.1028`
-
-## 3. Prove the Kinwoven UI
-
-```bash
-modal run tools/modal-on-device/probe.py::app_probe
-```
-
-The app probe starts a local static server, launches the same persistent Chrome
-profile, and performs the local-only flow. A pass requires:
+A pass requires:
 
 - the heading `Read your story`;
-- provenance beginning `On-device draft`;
-- no request to `googleapis.com`, `firebase`, `gstatic.com`,
+- provenance beginning `On-device draft` and containing `prompt kinwoven-draft-v3`;
+- no request to `firebasevertexai.googleapis.com`, `googleapis.com`, `firebase`, `gstatic.com`,
   `cloudfunctions.net` or `run.app` after the draft starts;
-- a screenshot and evidence file written to the Modal volume.
+- `cloud_inference_requests` empty in the evidence;
+- `ondevice-live.webm`, `ondevice-live.png` and `ondevice-live-evidence.json` on the modal volume.
+
+## 3. Prove cloud execution
+
+```bash
+modal run tools/modal-on-device/probe.py::cloud_probe
+```
+
+A pass requires:
+
+- provenance beginning `Cloud draft`, containing `gemini-3.5-flash-lite`,
+  `prompt kinwoven-draft-v3` and `App Check on`;
+- `x-firebase-appcheck: true` on the `firebasevertexai.googleapis.com` request;
+- `cloud_inference_requests` containing exactly the expected Gemini request;
+- the photo rendered at a non-zero natural width.
 
 ## 4. Download the evidence
 
 ```bash
-modal volume get kinwoven-chrome-profile app-evidence.json ./app-evidence.json
-modal volume get kinwoven-chrome-profile app-online.png ./app-online.png
-modal volume get kinwoven-chrome-profile raw-evidence.json ./raw-evidence.json
+modal volume get --force kinwoven-chrome-profile ondevice-live.webm ./ondevice-live.webm
+modal volume get --force kinwoven-chrome-profile ondevice-live.png ./ondevice-live.png
+modal volume get --force kinwoven-chrome-profile ondevice-live-evidence.json ./ondevice-live-evidence.json
+modal volume get --force kinwoven-chrome-profile cloud-live.webm ./cloud-live.webm
+modal volume get --force kinwoven-chrome-profile cloud-live.png ./cloud-live.png
+modal volume get --force kinwoven-chrome-profile cloud-live-evidence.json ./cloud-live-evidence.json
 ```
 
-Inspect the JSON and mask any local paths before publishing. The synthetic
-fixture is already labelled.
+Inspect the JSON and remove request URLs that contain the public API key or reCAPTCHA site key before
+publishing. Do not publish the raw evidence files; the sanitized combined file is
+`docs/media/runtime-proof-v3.json`. The synthetic fixture is already labelled.
+
+## 5. App Check rejection
+
+Replay the same captured request body and headers from the live page, once with
+`X-Firebase-AppCheck` and once without it. The expected results are:
+
+- with the header: `200`;
+- without the header: `401` `UNAUTHENTICATED`, message `Firebase App Check token is invalid.`
+
+Keep the token in browser memory. Save only the statuses and error message. Do not log request
+headers, the token, or the request body.
 
 ## Important limitations
 
 - This is **Chrome running in a Modal container**, not a family member's laptop.
-- The Firebase web values are test-only placeholders. No real Firebase project,
-  App Check configuration, cloud inference, sign-in, Firestore or Storage call
-  is exercised.
-- Raw Chrome offline inference passed. App-level offline drafting previously
-  timed out and is not covered by this run.
-- Chrome's Prompt API is desktop Chrome only. It is not available in Chrome for
-  Android or on Android TV.
+- The Firebase project and App Check are real for `live_app_probe`. The older `app_probe` used a
+  test-only placeholder and must not be presented as the live proof.
+- Sign-in, Firestore and Storage are implemented in source but have not been demonstrated.
+- Raw Chrome offline inference passed. App-level offline drafting previously timed out and is not
+  covered by this run.
+- Chrome's Prompt API is desktop Chrome only. It is not available in Chrome for Android or Android TV.
+- The runtime manifest reports `v3Nano` `2025.08.14.1358`, component `2025.8.21.1028`. No inspected
+  manifest or API response labels it “Gemini Nano 4”; equivalence is not established.
 - The exact Chrome flags that matter are the removal of Playwright's
-  `--disable-component-update` and `--disable-background-networking` defaults,
-  plus `--enable-features=CDPScreenshotNewSurface,OnDeviceModelForceCpuBackend`.
-  The persistent profile keeps the downloaded model between runs.
+  `--disable-component-update` and `--disable-background-networking` defaults, plus
+  `--enable-features=CDPScreenshotNewSurface,OnDeviceModelForceCpuBackend`. The persistent profile
+  keeps the downloaded model between runs.

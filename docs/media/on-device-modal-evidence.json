@@ -68,5 +68,8 @@
         }
       }
     ]
-  }
+  },
+  "historical": true,
+  "supersededBy": "docs/media/runtime-proof-v3.json",
+  "supersededNote": "v2-era capture. Current v3 live on-device evidence is docs/media/runtime-proof-v3.json."
 }

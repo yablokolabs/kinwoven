@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, Img, staticFile} from 'remotion';
+import {AbsoluteFill, Img, OffthreadVideo, Sequence, staticFile, useVideoConfig} from 'remotion';
 import {Chip, Eyebrow, Glass, Pop, Title, hexA} from '../components/ui';
 import {SOFT, useT} from '../hooks';
 import {C, F} from '../theme';
@@ -108,7 +108,7 @@ const Shot: React.FC<{src: string; at: number; width?: number; alt: string}> = (
             color: C.muted,
           }}
         >
-          kinwoven.local · on this device
+          kinwoven-proof.web.app · live
         </span>
       </div>
       <Img src={staticFile(src)} alt={alt} style={{display: 'block', width: '100%'}} />
@@ -295,40 +295,179 @@ export const QuestionDemo: React.FC = () => (
   </AbsoluteFill>
 );
 
+const ProofPanel: React.FC<{
+  at: number;
+  eyebrow: string;
+  meta: string;
+  note: string;
+  video: string;
+  still: string;
+  startFrom: number;
+  endAt: number;
+}> = ({at, eyebrow, meta, note, video, still, startFrom, endAt}) => {
+  const {sp} = useT();
+  const {fps} = useVideoConfig();
+  const p = sp(at, SOFT);
+  const clipFrames = Math.round((endAt - startFrom) * fps);
+  return (
+    <div
+      style={{
+        width: 560,
+        opacity: Math.min(1, p * 1.6),
+        transform: `translateY(${(1 - p) * 50}px)`,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'baseline',
+          justifyContent: 'space-between',
+          gap: 12,
+          marginBottom: 10,
+        }}
+      >
+        <span style={{fontFamily: F.mono, fontSize: 15, letterSpacing: 1.8, color: C.coralSoft}}>
+          {eyebrow}
+        </span>
+        <span style={{fontFamily: F.mono, fontSize: 12, letterSpacing: 0.8, color: C.muted}}>{meta}</span>
+      </div>
+      <div
+        style={{
+          overflow: 'hidden',
+          borderRadius: 22,
+          border: '1px solid rgba(255,246,234,0.24)',
+          background: '#160c14',
+          boxShadow: `0 30px 80px rgba(0,0,0,0.58), 0 0 60px ${hexA(C.coralSoft, 0.1)}`,
+        }}
+      >
+        <div
+          style={{
+            height: 34,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 7,
+            padding: '0 14px',
+            background: 'rgba(255,246,234,0.06)',
+            borderBottom: '1px solid rgba(255,246,234,0.09)',
+          }}
+        >
+          {['#d98a6a', '#d9b06a', '#8fbfa3'].map((color) => (
+            <span key={color} style={{width: 8, height: 8, borderRadius: 99, background: color}} />
+          ))}
+          <span style={{marginLeft: 8, fontFamily: F.mono, fontSize: 11, color: C.muted}}>
+            kinwoven-proof.web.app
+          </span>
+        </div>
+        <div style={{position: 'relative', width: 560, height: 315, overflow: 'hidden'}}>
+          <Img
+            src={staticFile(still)}
+            alt={`${eyebrow} live Kinwoven draft`}
+            style={{position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center'}}
+          />
+          <Sequence durationInFrames={clipFrames}>
+            <OffthreadVideo
+              src={staticFile(video)}
+              startFrom={Math.round(startFrom * fps)}
+              endAt={Math.round(endAt * fps)}
+              muted
+              style={{position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover'}}
+            />
+          </Sequence>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 'auto 0 0',
+              padding: '34px 16px 12px',
+              background: 'linear-gradient(180deg, rgba(16,7,14,0), rgba(16,7,14,0.94))',
+              fontFamily: F.body,
+              fontSize: 14,
+              color: C.ink,
+            }}
+          >
+            {note}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const DraftDemo: React.FC = () => (
-  <AbsoluteFill style={{padding: pad}}>
+  <AbsoluteFill style={{padding: '88px 120px 76px'}}>
     <div style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 30}}>
-      <Header eyebrow="Step 3 · Draft & approve" title="Only your facts. [One exact approval]." size={56} />
+      <Header eyebrow="Step 3 · Draft & approve" title="Local by default. [One exact approval]." size={54} />
       <Pop at={0.8} y={12}>
-        <Chip tone="green" size={18}>
-          Plain draft path · labelled
+        <Chip tone="green" size={17}>
+          Live v3 · App Check on
         </Chip>
       </Pop>
     </div>
-    <div style={{display: 'flex', justifyContent: 'center', marginTop: 22}}>
-      <Shot src="shots/draft.png" at={1.0} alt="Kinwoven draft screen with approval action" />
+    <div style={{display: 'flex', justifyContent: 'center', gap: 34, marginTop: 18}}>
+      <Pop at={1.0} y={40}>
+        <ProofPanel
+          at={1.0}
+          eyebrow="ON-DEVICE"
+          meta="Chrome 157 · 25.8 s"
+          note="Chrome built-in model · no inference request left the browser"
+          video="proof/on-device.webm"
+          still="media/on-device-live-v3.png"
+          startFrom={33.8}
+          endAt={35.9}
+        />
+      </Pop>
+      <Pop at={1.7} y={40}>
+        <ProofPanel
+          at={1.7}
+          eyebrow="CLOUD"
+          meta="gemini-3.5-flash-lite · 3.4 s"
+          note="Opt-in cloud draft · Firebase AI Logic with App Check"
+          video="proof/cloud.webm"
+          still="media/cloud-live-v3.png"
+          startFrom={11.5}
+          endAt={12.8}
+        />
+      </Pop>
     </div>
-    <Pop at={3.0} y={30} style={{position: 'absolute', right: 76, bottom: 96, width: 330}}>
-      <Glass
+    <Pop at={3.2} y={18} style={{display: 'flex', justifyContent: 'center', marginTop: 16}}>
+      <div style={{fontFamily: F.display, fontSize: 25, color: C.ink, textAlign: 'center'}}>
+        “The tea was still warm when the radio played our song.”
+        <span style={{fontFamily: F.mono, fontSize: 13, letterSpacing: 1.2, color: C.green, marginLeft: 14}}>
+          CLOUD V3 STORY
+        </span>
+      </div>
+    </Pop>
+    <Pop at={5.0} y={24} style={{display: 'flex', justifyContent: 'center', marginTop: 16}}>
+      <div
         style={{
-          padding: 24,
           display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
-          background: 'rgba(23,11,20,0.94)',
-          backdropFilter: 'blur(14px)',
+          alignItems: 'center',
+          gap: 14,
+          padding: '12px 18px',
+          borderRadius: 999,
+          background: 'rgba(23,11,20,0.86)',
+          border: '1px solid rgba(255,246,234,0.16)',
         }}
-        glow={C.green}
-        active={0.6}
       >
-        <div style={{fontFamily: F.mono, fontSize: 13, letterSpacing: 1.8, color: C.green}}>
+        <span style={{fontFamily: F.body, fontSize: 16, color: C.muted}}>Same cloud request</span>
+        <Chip tone="red" size={14}>
+          no App Check · 401 UNAUTHENTICATED
+        </Chip>
+        <span style={{fontFamily: F.mono, fontSize: 15, color: C.muted}}>→</span>
+        <Chip tone="green" size={14}>
+          App Check · 200 · draft
+        </Chip>
+      </div>
+    </Pop>
+    <Pop at={6.0} y={26} style={{position: 'absolute', right: 120, bottom: 52}}>
+      <Glass style={{padding: '18px 22px', width: 430}} glow={C.green} active={0.45}>
+        <div style={{fontFamily: F.mono, fontSize: 12, letterSpacing: 1.6, color: C.green}}>
           APPROVED · REVISION 3
         </div>
-        <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 28, color: C.ink}}>
+        <div style={{fontFamily: F.display, fontWeight: 700, fontSize: 25, color: C.ink, marginTop: 4}}>
           Bound to this version
         </div>
-        <div style={{fontFamily: F.body, fontSize: 17, lineHeight: 1.45, color: C.muted}}>
-          SHA-256 covers the words, the cited notes and the photo. Any later edit clears it.
+        <div style={{fontFamily: F.body, fontSize: 15, lineHeight: 1.4, color: C.muted, marginTop: 3}}>
+          SHA-256 covers the words, cited notes and photo. Any later edit clears it.
         </div>
       </Glass>
     </Pop>
@@ -416,7 +555,7 @@ export const Outro: React.FC = () => (
     />
     <Pop at={1.8} y={14}>
       <Chip tone="coral" size={20}>
-        kinwoven.local · local-first · family-approved
+        kinwoven-proof.web.app · local-first · family-approved
       </Chip>
     </Pop>
     <Pop at={2.4} y={12}>

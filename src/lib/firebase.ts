@@ -24,9 +24,9 @@ export function getFirebaseApp(): Promise<import('firebase/app').FirebaseApp> {
           true;
       }
       if (appCheckSiteKey) {
-        const { initializeAppCheck, ReCaptchaV3Provider } = await import('firebase/app-check');
+        const { initializeAppCheck, ReCaptchaEnterpriseProvider } = await import('firebase/app-check');
         initializeAppCheck(app, {
-          provider: new ReCaptchaV3Provider(appCheckSiteKey),
+          provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey),
           isTokenAutoRefreshEnabled: true,
         });
       }

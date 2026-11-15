@@ -11,10 +11,13 @@ confirms the words; playback uses only the version they approved.
 ## See it work
 
 [Watch the two-minute demo](docs/media/kinwoven-demo.mp4) with sound on. It follows one
-synthetic photo from capture to approval, then ends on the architecture below. The photo in the
-demo and the still fixtures in `assets/generated/` are AI-generated test material, not family
-media; the film labels the photo on screen. The published film predates the v2 runtime-proof
-update and still includes the labelled plain-draft segment; a new cut awaits a real cloud capture.
+synthetic photo from capture to approval, then shows the live on-device and cloud runtime proof,
+the App Check rejection/success check and the deployed URL. The photo in the demo and the still
+fixtures in `assets/generated/` are AI-generated test material, not family media; the film labels
+the photo on screen. The on-device segment is Chrome 157 in a Modal CPU container, not a family
+laptop.
+
+The app is live at [kinwoven-proof.web.app](https://kinwoven-proof.web.app).
 
 ## Architecture
 
@@ -26,19 +29,30 @@ The left zone never uploads. The dashed route is the only cloud path and is chos
 Approval binds a revision to a SHA-256 hash. Sharing is a separate, confirmed action that writes
 an immutable snapshot for family devices to read.
 
-## Status: on-device-proven, cloud-unproven
+## Status: on-device and cloud proven
 
 - Working: local capture, notes, question, editable draft, revision-bound approval, story player,
   IndexedDB persistence, and a publishing path for an explicitly approved snapshot.
-- Proven: on-device drafting through Firebase AI Logic in branded Chrome 157 on a Modal Linux CPU
-  container, using the synthetic fixture. The SDK reported `on_device`; the UI rendered the draft as
-  `prompt kinwoven-draft-v2` in 25.6 s and no Firebase or Google request occurred during the draft.
-  See the [proof screenshot](docs/media/on-device-modal.png) and
-  [redacted evidence](docs/media/on-device-modal-evidence.json). The Firebase config was a local
-  test-only placeholder; this is not a real project or App Check proof.
-- Implemented but unproven: cloud inference, App Check attestation with a real Firebase project,
-  anonymous sign-in, Firestore/Storage publishing, and app-level offline drafting. The raw Chrome
-  Prompt API completed offline, but the app-level retry timed out.
+- Proven on-device: on the live deployed app with its real Firebase project and App Check, Chrome
+  157.0.8103.78 on a Modal Linux CPU container completed `On-device draft · on-device Chrome model ·
+  25.8s · prompt kinwoven-draft-v3`. The SDK reported `on_device`; the request trace recorded no
+  Firebase AI Logic or other cloud inference call. See the
+  [proof screenshot](docs/media/on-device-live-v3.png) and
+  [sanitized evidence](docs/media/runtime-proof-v3.json).
+- Proven cloud: the same deployed app produced `Cloud draft · gemini-3.5-flash-lite · 3.4s · prompt
+  kinwoven-draft-v3 · App Check on`; its story includes the tea/radio answer. Replaying the same
+  request without `X-Firebase-AppCheck` returned 401 `UNAUTHENTICATED`
+  (`Firebase App Check token is invalid.`), while the request with the header returned 200. Tokens
+  stayed in browser memory and are not in the evidence. See
+  [cloud screenshot](docs/media/cloud-live-v3.png).
+- Prompt v3 is deployed at https://kinwoven-proof.web.app. It requires the family answer in the
+  story; both live v3 drafts include it. The on-device model still added unsupported day/filler
+  wording and a question, which the review card flags for editing.
+- Implemented but unproven: anonymous sign-in, Firestore/Storage publishing, and app-level offline
+  drafting. The raw Chrome Prompt API completed offline, but the app-level retry timed out.
+- Runtime-label caveat: the event wording says “Gemini Nano 4.” The inspected Chrome runtime reports
+  `v3Nano` 2025.08.14.1358, component 2025.8.21.1028; no inspected manifest or API response labels it
+  Gemini Nano 4. Equivalence is not established, so do not claim that requirement is met.
 - The interface and the full local flow (photo, notes, question, draft, approval, playback) were
   rendered and driven in moli 1.1.24 and again in actual Chrome during the on-device proof.
 - The plain draft path (`kind: 'template'`) exists so the product stays usable without a model. It is
@@ -70,7 +84,7 @@ Firebase values below.
    guided setup; choose the Gemini Developer API for the free tier.
 2. Copy the web config into `.env.local` from [.env.example](.env.example). These values are public
    identifiers; no private key belongs in a web app.
-3. Register a **reCAPTCHA v3** App Check provider and put its site key in `VITE_APPCHECK_SITE_KEY`.
+3. Register a **reCAPTCHA Enterprise** App Check provider and put its site key in `VITE_APPCHECK_SITE_KEY`. Add the deployed hostname to the reCAPTCHA key; use a debug token for local development instead of adding `localhost`.
    For localhost only, set `VITE_APPCHECK_DEBUG=true`, then register the debug token printed in the
    console under **App Check → Apps → Manage debug tokens**. Never ship that flag.
 4. Enable **Authentication → Anonymous**, create a **Firestore** database and a **Cloud Storage**

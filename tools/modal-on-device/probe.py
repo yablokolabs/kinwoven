@@ -23,7 +23,7 @@ import modal
 
 app = modal.App("kinwoven-on-device-probe")
 
-BUILD_ID = "2026-11-15-v2"
+BUILD_ID = "2026-11-15-v3"
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
@@ -55,6 +55,7 @@ image = (
         "rm -f /tmp/google-chrome.deb",
     )
     .pip_install("playwright==1.55.0")
+    .run_commands("playwright install ffmpeg")
     .run_commands(f"echo {BUILD_ID} > /opt/kinwoven-probe-build")
 )
 
@@ -292,15 +293,25 @@ def _start_xvfb():
     return process
 
 
-def _launch(p, width: int, height: int):
-    return p.chromium.launch_persistent_context(
-        user_data_dir="/data/profile",
+def _launch(
+    p,
+    width: int,
+    height: int,
+    video_dir: str | None = None,
+    profile_dir: str = "/data/profile",
+):
+    options = dict(
+        user_data_dir=profile_dir,
         executable_path="/usr/bin/google-chrome",
         headless=False,
         ignore_default_args=PLAYWRIGHT_IGNORE_DEFAULTS,
         args=CHROME_ARGS,
         viewport={"width": width, "height": height},
     )
+    if video_dir:
+        options["record_video_dir"] = video_dir
+        options["record_video_size"] = {"width": width, "height": height}
+    return p.chromium.launch_persistent_context(**options)
 
 
 @app.function(image=image, timeout=300)
@@ -410,9 +421,9 @@ def app_probe():
     from playwright.sync_api import sync_playwright
 
     app_js = list(Path("/app/dist/assets").glob("index-*.js"))
-    if not any("kinwoven-draft-v2" in path.read_text(errors="ignore") for path in app_js):
+    if not any("kinwoven-draft-v3" in path.read_text(errors="ignore") for path in app_js):
         raise RuntimeError(
-            "Stale app image: /app/dist does not contain prompt kinwoven-draft-v2. "
+            "Stale app image: /app/dist does not contain prompt kinwoven-draft-v3. "
             "Rebuild with npx vite build --mode test and rerun."
         )
 
@@ -494,6 +505,9 @@ def app_probe():
                     )
                 )
             ]
+            evidence["cloud_inference_requests"] = [
+                item for item in draft_requests if "firebasevertexai" in item["url"]
+            ]
             if online.get("ok"):
                 page.screenshot(path="/data/app-online.png", full_page=True)
                 evidence["draft_text"] = {
@@ -515,4 +529,224 @@ def app_probe():
             except Exception:
                 pass
         server.shutdown()
+        xvfb.terminate()
+
+
+@app.function(
+    image=app_image,
+    cpu=8,
+    memory=32768,
+    timeout=1800,
+    volumes={"/data": profile},
+)
+def live_app_probe():
+    """Run the deployed v3 app on-device and record real UI video."""
+    from playwright.sync_api import sync_playwright
+
+    live_url = "https://kinwoven-proof.web.app/?build=live-v3"
+    video_dir = Path("/data/ondevice-video")
+    video_dir.mkdir(parents=True, exist_ok=True)
+    evidence: dict[str, object] = {
+        "scope": "Live deployed app, on-device only, real Firebase project and App Check. "
+        "Synthetic fixture; no family data.",
+        "url": live_url,
+        "build": BUILD_ID,
+        "chrome": subprocess.check_output(["google-chrome", "--version"], text=True).strip(),
+        "platform": platform.platform(),
+        "python": platform.python_version(),
+        "cpu_count": os.cpu_count(),
+        "memory_gib": _memory_gib(),
+        "profile_disk_gib": _disk_gib("/data"),
+    }
+    xvfb = _start_xvfb()
+    draft_requests: list[dict[str, str]] = []
+    recording = {"draft": False}
+    console: list[str] = []
+    page_errors: list[str] = []
+    context = None
+    try:
+        with sync_playwright() as p:
+            context = _launch(p, 1920, 1080, str(video_dir))
+            page = context.pages[0] if context.pages else context.new_page()
+            video = page.video
+            page.on(
+                "request",
+                lambda request: draft_requests.append(
+                    {"method": request.method, "url": request.url, "type": request.resource_type}
+                )
+                if recording["draft"]
+                else None,
+            )
+            page.on("console", lambda message: console.append(f"{message.type}: {message.text}"))
+            page.on("pageerror", lambda error: page_errors.append(str(error)))
+
+            page.goto(live_url, wait_until="domcontentloaded")
+            page.get_by_role("button", name="Start a memory").wait_for(timeout=120000)
+            page.get_by_role("button", name="Start a memory").click()
+            page.get_by_role("heading", name="Add one photo").wait_for()
+            page.locator('input[type="file"]').set_input_files("/app/fixtures/kitchen-table.jpg")
+            page.locator("textarea").fill(NOTES)
+            _wait_ready(page, timeout_seconds=120)
+            page.get_by_role("button", name="Next: one question").click()
+            page.get_by_role("heading", name="One thing the photo cannot show").wait_for()
+            page.locator("textarea").fill(ANSWER)
+
+            recording["draft"] = True
+            page.get_by_role("button", name="Make my draft").click()
+            online = _wait_for_draft(page)
+            recording["draft"] = False
+
+            evidence["online"] = online
+            evidence["page_errors"] = list(page_errors)
+            evidence["console"] = list(console)
+            evidence["requests_during_draft"] = list(draft_requests)
+            evidence["online_requests"] = [
+                item
+                for item in draft_requests
+                if any(
+                    host in item["url"]
+                    for host in (
+                        "googleapis.com",
+                        "firebase",
+                        "gstatic.com",
+                        "cloudfunctions.net",
+                        "run.app",
+                    )
+                )
+            ]
+            evidence["cloud_inference_requests"] = [
+                item for item in draft_requests if "firebasevertexai" in item["url"]
+            ]
+            if online.get("ok"):
+                page.wait_for_timeout(6000)
+                page.screenshot(path="/data/ondevice-live.png", full_page=True)
+                evidence["draft_text"] = {
+                    "caption": online.get("caption"),
+                    "story": online.get("story"),
+                }
+
+            context.close()
+            context = None
+            if video:
+                try:
+                    Path(video.path()).replace("/data/ondevice-live.webm")
+                    evidence["video"] = "/data/ondevice-live.webm"
+                except Exception as exc:
+                    evidence["video_error"] = str(exc)
+            evidence["model"] = _model_info()
+            Path("/data/ondevice-live-evidence.json").write_text(json.dumps(evidence, indent=2))
+            profile.commit()
+            print("LIVE_APP_EVIDENCE")
+            print(json.dumps(evidence, indent=2))
+    finally:
+        if context is not None:
+            try:
+                context.close()
+            except Exception:
+                pass
+        xvfb.terminate()
+
+
+@app.function(
+    image=app_image,
+    cpu=8,
+    memory=32768,
+    timeout=1800,
+    volumes={"/data": profile},
+)
+def cloud_probe():
+    """Run the deployed v3 app in a fresh profile so it falls back to cloud."""
+    from playwright.sync_api import sync_playwright
+
+    live_url = "https://kinwoven-proof.web.app/?build=live-v3-cloud"
+    video_dir = Path("/data/cloud-video")
+    video_dir.mkdir(parents=True, exist_ok=True)
+    evidence: dict[str, object] = {
+        "scope": "Live deployed app, fresh Chrome profile, cloud fallback with real App Check. "
+        "Synthetic fixture; no family data.",
+        "url": live_url,
+        "build": BUILD_ID,
+        "chrome": subprocess.check_output(["google-chrome", "--version"], text=True).strip(),
+        "platform": platform.platform(),
+        "python": platform.python_version(),
+        "cpu_count": os.cpu_count(),
+        "memory_gib": _memory_gib(),
+        "profile_disk_gib": _disk_gib("/data"),
+    }
+    xvfb = _start_xvfb()
+    draft_requests: list[dict[str, object]] = []
+    recording = {"draft": False}
+    console: list[str] = []
+    page_errors: list[str] = []
+    context = None
+    try:
+        with sync_playwright() as p:
+            context = _launch(p, 1920, 1080, str(video_dir), "/data/cloud-profile")
+            page = context.pages[0] if context.pages else context.new_page()
+            video = page.video
+            page.on(
+                "request",
+                lambda request: draft_requests.append(
+                    {
+                        "method": request.method,
+                        "url": request.url,
+                        "type": request.resource_type,
+                        "app_check": bool(request.headers.get("x-firebase-appcheck")),
+                    }
+                )
+                if recording["draft"]
+                else None,
+            )
+            page.on("console", lambda message: console.append(f"{message.type}: {message.text}"))
+            page.on("pageerror", lambda error: page_errors.append(str(error)))
+
+            page.goto(live_url, wait_until="domcontentloaded")
+            page.get_by_role("button", name="Start a memory").wait_for(timeout=120000)
+            page.get_by_role("button", name="Start a memory").click()
+            page.get_by_role("heading", name="Add one photo").wait_for()
+            page.locator('input[type="file"]').set_input_files("/app/fixtures/kitchen-table.jpg")
+            page.locator("textarea").fill(NOTES)
+            _wait_ready(page, timeout_seconds=120)
+            page.get_by_role("button", name="Next: one question").click()
+            page.get_by_role("heading", name="One thing the photo cannot show").wait_for()
+            page.locator("textarea").fill(ANSWER)
+            page.locator('input[type="radio"][value="cloud"]').check()
+
+            recording["draft"] = True
+            page.get_by_role("button", name="Make my draft").click()
+            online = _wait_for_draft(page)
+            recording["draft"] = False
+
+            evidence["online"] = online
+            evidence["page_errors"] = list(page_errors)
+            evidence["console"] = list(console)
+            evidence["requests_during_draft"] = list(draft_requests)
+            evidence["cloud_inference_requests"] = [
+                item for item in draft_requests if "firebasevertexai" in str(item["url"])
+            ]
+            if online.get("ok"):
+                page.screenshot(path="/data/cloud-live.png", full_page=True)
+                evidence["draft_text"] = {
+                    "caption": online.get("caption"),
+                    "story": online.get("story"),
+                }
+
+            context.close()
+            context = None
+            if video:
+                try:
+                    Path(video.path()).replace("/data/cloud-live.webm")
+                    evidence["video"] = "/data/cloud-live.webm"
+                except Exception as exc:
+                    evidence["video_error"] = str(exc)
+            Path("/data/cloud-live-evidence.json").write_text(json.dumps(evidence, indent=2))
+            profile.commit()
+            print("CLOUD_LIVE_EVIDENCE")
+            print(json.dumps(evidence, indent=2))
+    finally:
+        if context is not None:
+            try:
+                context.close()
+            except Exception:
+                pass
         xvfb.terminate()

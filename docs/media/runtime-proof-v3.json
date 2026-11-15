@@ -1,0 +1,77 @@
+{
+  "schema": "kinwoven-runtime-proof/v3",
+  "captured_at": "2026-11-15",
+  "app_url": "https://kinwoven-proof.web.app",
+  "build": "2026-11-15-v3",
+  "prompt_version": "kinwoven-draft-v3",
+  "fixture": "Synthetic kitchen-table photo and notes in assets/generated/. No family data.",
+  "on_device": {
+    "source": "on_device",
+    "chrome": "Google Chrome 157.0.8103.78",
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+    "model_manifest": {
+      "manifest_version": 2,
+      "name": "Optimization Guide On Device Model",
+      "version": "2025.8.21.1028",
+      "BaseModelSpec": {
+        "name": "v3Nano",
+        "version": "2025.08.14.1358",
+        "supported_performance_hints": [
+          3
+        ]
+      }
+    },
+    "model_files": {
+      "weights_bytes": 2862920655,
+      "cache_bytes": 1409783784,
+      "component_version": "2025.8.21.1028"
+    },
+    "duration_seconds": 25.8,
+    "provenance": "On-device draft \u00b7 on-device Chrome model \u00b7 25.8s \u00b7 prompt kinwoven-draft-v3",
+    "status": "Drafted on this device in 25.8s.",
+    "caption": "This day happened on Sundays and involved a kitchen table, a radio, and humming.",
+    "story": "We ate at the table in the kitchen every Sunday. The radio was always on. A radio would be playing, and Mum would hum along while she poured the tea. The radio was always on. Mum would hum along while she poured the tea. This day is known from a photo but some details are missing. What happened at the kitchen table that isn't in the photo?",
+    "review": "Check before approving. These words are in the draft but not in the notes or answer you gave. If they are wrong, edit the caption or story above.\n\nday time of day\nphoto filler or commentary\n\nThis short check cannot catch every inference. Read the whole draft before you approve.",
+    "cloud_inference_requests": [],
+    "network_note": "During the draft, requests were limited to the deployed app assets and reCAPTCHA Enterprise. No Firebase AI Logic or other inference host was called.",
+    "video": "demo/public/proof/on-device.webm",
+    "screenshot": "docs/media/on-device-live-v3.png"
+  },
+  "cloud": {
+    "source": "cloud",
+    "model": "gemini-3.5-flash-lite",
+    "duration_seconds": 3.4,
+    "provenance": "Cloud draft \u00b7 gemini-3.5-flash-lite \u00b7 3.4s \u00b7 prompt kinwoven-draft-v3 \u00b7 App Check on",
+    "caption": "The table was in the kitchen where we ate every Sunday.",
+    "story": "The table was in the kitchen. We ate there every Sunday. The blue bowl held apples. The tea was still warm when the radio played our song.",
+    "app_check_header_present": true,
+    "cloud_request_count": 1,
+    "endpoint": "https://firebasevertexai.googleapis.com/v1beta/projects/kinwoven-proof/models/gemini-3.5-flash-lite:generateContent",
+    "video": "demo/public/proof/cloud.webm",
+    "screenshot": "docs/media/cloud-live-v3.png"
+  },
+  "app_check_rejection": {
+    "method": "Same captured v3 cloud request, replayed from the live page. App Check token kept in memory; not written.",
+    "with_app_check": {
+      "status": 200,
+      "message": ""
+    },
+    "without_app_check": {
+      "status": 401,
+      "message": "Firebase App Check token is invalid."
+    },
+    "token_exposed": false,
+    "note": "The captured body and headers were replayed from the live page. The App Check token stayed in browser memory and was not written to this file or logs."
+  },
+  "gemini_nano_4": {
+    "requirement_as_written": "Gemini Nano 4",
+    "observed_runtime": "Chrome built-in model manifest v3Nano, version 2025.08.14.1358, component 2025.8.21.1028",
+    "equivalence_established": false,
+    "note": "The runtime identifies the model as v3Nano. No inspected manifest, Chrome setting or API response labels it Gemini Nano 4. Do not claim the requirement is met until the event owner confirms equivalence."
+  },
+  "limits": [
+    "The on-device draft added unsupported day/filler wording and a question; the review card flags some of it. The family must edit and approve.",
+    "No sign-in, Firestore or Storage call is demonstrated here.",
+    "The on-device run used Chrome 157 on a Modal CPU container, not a family laptop."
+  ]
+}

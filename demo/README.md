@@ -12,14 +12,17 @@ clay and gold palette.
 2. Why the meaning is usually what goes missing.
 3. Capture: photo and plain notes stay on the device.
 4. One question, plus the per-draft privacy choice.
-5. A draft built only from those facts, then a revision-bound approval.
+5. A live on-device draft and a live cloud draft, both `prompt kinwoven-draft-v3`, followed by the
+   App Check rejection/success check and a revision-bound approval.
 6. Playback of the approved version.
 7. The architecture diagram: local by default, explicit share only.
 8. Outro with the logo.
 
-The app screenshots in `public/shots/` were recaptured from the running app at 1920×1080 with
-Playwright after the twilight UI pass. The photo is the synthetic kitchen fixture from
-`assets/generated/`, not family media.
+The walkthrough screenshots in `public/shots/` were recaptured from the running app at 1920×1080
+with Playwright after the twilight UI pass. The runtime-proof clips in `public/proof/` and the
+full-page frames in `public/media/` are from the live v3 app: on-device in Chrome 157 on a Modal CPU
+container, cloud in a fresh Chrome profile. The photo is the synthetic kitchen fixture from
+`assets/generated/`, not family media. Evidence is in `../docs/media/runtime-proof-v3.json`.
 
 ## Narration
 
