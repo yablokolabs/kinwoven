@@ -28,8 +28,7 @@ word list, but it is not a semantic checker.
 - Node 22 and the project dependencies.
 - A real `.env.local` with the public Firebase web values and the reCAPTCHA Enterprise App Check site
   key. Keep it untracked. Do not use secrets in the browser build.
-- No GPU. The functions request 8 CPU and 32 GB memory. The recorded container reported 24 vCPU and
-  396.47 GiB visible memory.
+- No GPU. The functions request 8 CPU and 32 GB memory; the recorded run used a CPU container.
 - The Modal volume `kinwoven-chrome-profile`. Keeping it avoids downloading the model again. The
   on-device profile is `/data/profile`; the cloud fallback profile is `/data/cloud-profile` and must
   not contain the on-device model.
