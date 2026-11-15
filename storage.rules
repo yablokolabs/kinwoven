@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isMember(spaceId) {
+      return signedIn()
+        && firestore.exists(/databases/(default)/documents/familySpaces/$(spaceId)/members/$(request.auth.uid));
+    }
+
+    match /families/{spaceId}/stories/{storyId}/{fileName} {
+      allow read: if isMember(spaceId);
+      allow create: if isMember(spaceId)
+        && request.resource.size < 12 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png)');
+      allow update, delete: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

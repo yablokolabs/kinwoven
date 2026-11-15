@@ -1,0 +1,10 @@
+node_modules/
+out/
+stills/
+
+# Render outputs and local capture assets
+out/
+stills/
+public/narration.wav
+public/voice-viz.wav
+public/*.mp4

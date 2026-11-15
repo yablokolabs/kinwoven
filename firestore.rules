@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isMember(spaceId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/familySpaces/$(spaceId)/members/$(request.auth.uid));
+    }
+
+    match /familySpaces/{spaceId} {
+      allow read: if isMember(spaceId);
+      allow write: if false;
+
+      match /members/{uid} {
+        allow read: if isMember(spaceId);
+        allow write: if false;
+      }
+
+      match /stories/{storyId} {
+        allow read: if isMember(spaceId);
+        allow create, update: if isMember(spaceId)
+          && request.resource.data.publishedBy == request.auth.uid
+          && request.resource.data.approvedRevision is int
+          && request.resource.data.contentHash is string
+          && request.resource.data.mediaPath is string
+          && request.resource.data.snapshot is map
+          && request.resource.data.keys().hasOnly(
+               ['snapshot', 'approvedRevision', 'contentHash', 'mediaPath', 'publishedAt', 'publishedBy']
+             );
+        allow delete: if false;
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

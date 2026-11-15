@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1180 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="arch-title arch-desc" id="architecture-root">
+      <title id="arch-title">Kinwoven local-first architecture</title>
+      <desc id="arch-desc">A photo and typed notes are stored in IndexedDB on the device. The draft engine runs on-device by default. A dashed opt-in path goes through App Check to a cloud model. Approval binds a revision to a SHA-256 hash. An explicit share writes a published snapshot through App Check, and family devices read only that snapshot.</desc>
+      <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #architecture-root { --color-paper: #f4ead8;
+      --color-paper-2: #fffaf1;
+      --color-ink: #2f1826;
+      --color-muted: #6b4f60;
+      --color-soft: #7a6070;
+      --color-accent: #a94c2c;
+      --color-accent-tint: rgba(169, 76, 44, 0.08);
+      --color-rule: rgba(47, 24, 38, 0.12);
+      --color-gold: #e5a53c;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace; }
+      #architecture-root { font-family: var(--font-sans); color: var(--color-ink); }</style>
+        <marker id="architecture-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b4f60"/></marker>
+        <marker id="architecture-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#a94c2c"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f4ead8"/>
+
+      <!-- Trust zones: drawn before arrows and nodes -->
+      <rect x="40" y="100" width="580" height="470" rx="8"
+            fill="#2f1826" stroke="#2f1826" stroke-width="0.8" fill-opacity="0.02" stroke-opacity="0.10"/>
+      <rect x="60" y="104" width="226" height="13" rx="2" fill="#f4ead8"/>
+      <text x="66" y="114" fill="#7a6070" font-size="7" font-family="'Geist Mono', monospace"
+            letter-spacing="0.14em">THIS DEVICE · NO UPLOAD</text>
+
+      <rect x="660" y="100" width="480" height="470" rx="8"
+            fill="#2f1826" stroke="#2f1826" stroke-width="0.8" fill-opacity="0.02" stroke-opacity="0.10"/>
+      <rect x="680" y="104" width="270" height="13" rx="2" fill="#f4ead8"/>
+      <text x="686" y="114" fill="#7a6070" font-size="7" font-family="'Geist Mono', monospace"
+            letter-spacing="0.14em">FIREBASE · ONLY WHEN YOU SHARE</text>
+
+      <!-- Connectors first, so lines sit behind nodes -->
+      <!-- Photo + notes -> IndexedDB -->
+      <line x1="185" y1="236" x2="185" y2="310" stroke="#6b4f60" stroke-width="1.2" marker-end="url(#architecture-arrow)"/>
+      <rect x="124" y="264" width="122" height="14" rx="2" fill="#f4ead8"/>
+      <text x="185" y="274" fill="#6b4f60" font-size="8" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.06em">STAYS LOCAL</text>
+
+      <!-- IndexedDB -> draft engine -->
+      <path d="M 185,310 V 280 Q 185,272 193,272 H 340"
+            fill="none" stroke="#6b4f60" stroke-width="1.2" marker-end="url(#architecture-arrow)"/>
+      <rect x="218" y="252" width="102" height="14" rx="2" fill="#f4ead8"/>
+      <text x="269" y="262" fill="#6b4f60" font-size="8" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.06em">YOUR NOTES</text>
+
+      <!-- Draft engine -> approval -->
+      <line x1="455" y1="344" x2="455" y2="430" stroke="#a94c2c" stroke-width="1.4" marker-end="url(#architecture-arrow-accent)"/>
+      <rect x="406" y="380" width="98" height="14" rx="2" fill="#f4ead8"/>
+      <text x="455" y="390" fill="#a94c2c" font-size="8" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.06em">DRAFT + HASH</text>
+
+      <!-- Draft engine -> App Check, dashed opt-in -->
+      <path d="M 570,272 H 672 Q 680,272 680,264 V 201 Q 680,193 688,193 H 700"
+            fill="none" stroke="#6b4f60" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#architecture-arrow)"/>
+      <rect x="576" y="252" width="116" height="14" rx="2" fill="#f4ead8"/>
+      <text x="634" y="262" fill="#6b4f60" font-size="8" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.06em">CLOUD OPT-IN</text>
+
+      <!-- App Check -> cloud model -->
+      <line x1="810" y1="236" x2="810" y2="300" stroke="#6b4f60" stroke-width="1.2" marker-end="url(#architecture-arrow)"/>
+      <rect x="818" y="262" width="58" height="14" rx="2" fill="#f4ead8"/>
+      <text x="847" y="272" fill="#6b4f60" font-size="8" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.06em">MODEL</text>
+
+      <!-- Approval -> published snapshot -->
+      <path d="M 570,478 H 672 Q 680,478 680,470 H 700"
+            fill="none" stroke="#6b4f60" stroke-width="1.2" marker-end="url(#architecture-arrow)"/>
+      <rect x="570" y="464" width="140" height="14" rx="2" fill="#f4ead8"/>
+      <text x="640" y="474" fill="#6b4f60" font-size="8" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.06em">EXPLICIT SHARE</text>
+
+      <!-- Published snapshot -> family device -->
+      <line x1="900" y1="520" x2="900" y2="600" stroke="#6b4f60" stroke-width="1.2" marker-end="url(#architecture-arrow)"/>
+      <rect x="914" y="550" width="108" height="14" rx="2" fill="#f4ead8"/>
+      <text x="968" y="560" fill="#6b4f60" font-size="8" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.06em">MEMBER READ</text>
+
+      <!-- Node: photo + notes -->
+      <rect x="80" y="150" width="210" height="86" rx="6" fill="#f4ead8"/>
+      <rect x="80" y="150" width="210" height="86" rx="6" fill="#6b4f60" stroke="#7a6070" stroke-width="1" fill-opacity="0.10"/>
+      <rect x="92" y="162" width="34" height="13" rx="2" fill="none" stroke="#7a6070" stroke-width="0.8" stroke-opacity="0.45"/>
+      <text x="109" y="171" fill="#7a6070" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">INPUT</text>
+      <text x="96" y="199" fill="#2f1826" font-size="14" font-weight="600" font-family="'Geist', sans-serif">Photo + notes</text>
+      <text x="96" y="216" fill="#6b4f60" font-size="9" font-family="'Geist Mono', monospace">JPEG/PNG · typed facts</text>
+
+      <!-- Node: IndexedDB -->
+      <rect x="80" y="310" width="210" height="86" rx="6" fill="#f4ead8"/>
+      <rect x="80" y="310" width="210" height="86" rx="6" fill="#2f1826" stroke="#6b4f60" stroke-width="1" fill-opacity="0.05"/>
+      <rect x="92" y="322" width="34" height="13" rx="2" fill="none" stroke="#7a6070" stroke-width="0.8" stroke-opacity="0.45"/>
+      <text x="109" y="331" fill="#7a6070" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STORE</text>
+      <text x="96" y="359" fill="#2f1826" font-size="14" font-weight="600" font-family="'Geist', sans-serif">IndexedDB</text>
+      <text x="96" y="376" fill="#6b4f60" font-size="9" font-family="'Geist Mono', monospace">photo blob · drafts</text>
+
+      <!-- Node: draft engine, focal -->
+      <rect x="340" y="236" width="230" height="108" rx="6" fill="#f4ead8"/>
+      <rect x="340" y="236" width="230" height="108" rx="6" fill="#a94c2c" stroke="#a94c2c" stroke-width="1.4" fill-opacity="0.08"/>
+      <rect x="352" y="248" width="48" height="13" rx="2" fill="none" stroke="#a94c2c" stroke-width="0.8" stroke-opacity="0.5"/>
+      <text x="376" y="257" fill="#a94c2c" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ENGINE</text>
+      <text x="356" y="289" fill="#2f1826" font-size="16" font-weight="600" font-family="'Geist', sans-serif">Draft engine</text>
+      <text x="356" y="307" fill="#6b4f60" font-size="9" font-family="'Geist Mono', monospace">on-device first</text>
+      <text x="356" y="323" fill="#6b4f60" font-size="9" font-family="'Geist Mono', monospace">zod-bounded output</text>
+
+      <!-- Node: approval -->
+      <rect x="340" y="430" width="230" height="96" rx="6" fill="#f4ead8"/>
+      <rect x="340" y="430" width="230" height="96" rx="6" fill="#a94c2c" stroke="#a94c2c" stroke-width="1.4" fill-opacity="0.05"/>
+      <rect x="352" y="442" width="54" height="13" rx="2" fill="none" stroke="#a94c2c" stroke-width="0.8" stroke-opacity="0.5"/>
+      <text x="379" y="451" fill="#a94c2c" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">APPROVE</text>
+      <text x="356" y="482" fill="#2f1826" font-size="14" font-weight="600" font-family="'Geist', sans-serif">Approval</text>
+      <text x="356" y="499" fill="#6b4f60" font-size="9" font-family="'Geist Mono', monospace">revision + SHA-256</text>
+
+      <!-- Node: App Check -->
+      <rect x="700" y="150" width="220" height="86" rx="6" fill="#f4ead8"/>
+      <rect x="700" y="150" width="220" height="86" rx="6" fill="#2f1826" stroke="#2f1826" stroke-width="1" stroke-dasharray="4,4" fill-opacity="0.02" stroke-opacity="0.32"/>
+      <rect x="712" y="162" width="40" height="13" rx="2" fill="none" stroke="#7a6070" stroke-width="0.8" stroke-opacity="0.45"/>
+      <text x="732" y="171" fill="#7a6070" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CHECK</text>
+      <text x="716" y="199" fill="#2f1826" font-size="14" font-weight="600" font-family="'Geist', sans-serif">App Check + auth</text>
+      <text x="716" y="216" fill="#6b4f60" font-size="9" font-family="'Geist Mono', monospace">reCAPTCHA · anonymous uid</text>
+
+      <!-- Node: cloud model -->
+      <rect x="700" y="300" width="220" height="86" rx="6" fill="#f4ead8"/>
+      <rect x="700" y="300" width="220" height="86" rx="6" fill="#2f1826" stroke="#2f1826" stroke-width="1" fill-opacity="0.03" stroke-opacity="0.30"/>
+      <rect x="712" y="312" width="36" height="13" rx="2" fill="none" stroke="#7a6070" stroke-width="0.8" stroke-opacity="0.45"/>
+      <text x="730" y="321" fill="#7a6070" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CLOUD</text>
+      <text x="716" y="349" fill="#2f1826" font-size="14" font-weight="600" font-family="'Geist', sans-serif">Cloud model</text>
+      <text x="716" y="366" fill="#6b4f60" font-size="9" font-family="'Geist Mono', monospace">Gemini · only if allowed</text>
+
+      <!-- Node: published snapshot -->
+      <rect x="700" y="420" width="400" height="100" rx="6" fill="#f4ead8"/>
+      <rect x="700" y="420" width="400" height="100" rx="6" fill="#2f1826" stroke="#6b4f60" stroke-width="1" fill-opacity="0.05"/>
+      <rect x="712" y="432" width="34" height="13" rx="2" fill="none" stroke="#7a6070" stroke-width="0.8" stroke-opacity="0.45"/>
+      <text x="729" y="441" fill="#7a6070" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STORE</text>
+      <text x="716" y="474" fill="#2f1826" font-size="14" font-weight="600" font-family="'Geist', sans-serif">Published snapshot</text>
+      <text x="716" y="491" fill="#6b4f60" font-size="9" font-family="'Geist Mono', monospace">Firestore record · Storage photo · immutable</text>
+
+      <!-- Node: family device -->
+      <rect x="780" y="600" width="240" height="80" rx="6" fill="#f4ead8"/>
+      <rect x="780" y="600" width="240" height="80" rx="6" fill="#6b4f60" stroke="#7a6070" stroke-width="1" fill-opacity="0.08"/>
+      <rect x="792" y="612" width="40" height="13" rx="2" fill="none" stroke="#7a6070" stroke-width="0.8" stroke-opacity="0.45"/>
+      <text x="812" y="621" fill="#7a6070" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">READ</text>
+      <text x="796" y="652" fill="#2f1826" font-size="14" font-weight="600" font-family="'Geist', sans-serif">Family devices</text>
+      <text x="796" y="669" fill="#6b4f60" font-size="9" font-family="'Geist Mono', monospace">approved version only</text>
+    </svg>

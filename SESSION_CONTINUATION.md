@@ -1,0 +1,15 @@
+# Resume Kinwoven
+
+Read AGENTS.md and docs/PROGRESS.md. Inspect Git status and the latest commit. Resume the earliest incomplete milestone. Preserve evidence and work from earlier sessions. Tests cover the commit and environment they actually ran against.
+
+Checkpoint every milestone or 30 minutes with current commit, actual checks, device capabilities, sanitized evidence, blockers and next action. If configured and authorized, use Hindsight bank kinwoven for sanitized summaries. Use context-mode and actual installed skill instructions where available. Do not claim unavailable tools ran.
+
+Do not mark completion until a normal user can finish the core flow, local and cloud execution are proven through Firebase AI Logic, and required submission artifacts are prepared. Separate developer-ready, demo-ready and submitted states.
+
+Last change (Nov 15, 2026): published the source, docs and demo at https://github.com/yablokolabs/kinwoven on the public `main` branch, with no commit footer or AI-tool attribution. Pre-push audit: only `.env.example` placeholders (no `.env.local`), no private transcripts, family media or signed links, synthetic fixtures labelled, and `dist/`, `demo/out/`, `demo/stills/`, `.DS_Store` and the narration WAV ignored. Removed the unused “Built with care” line from `demo/src/scenes/Outro.tsx`; the rendered outro is from `demo/src/scenes/Video.tsx`, and frame 126 s shows no footer. Checks: `npm run typecheck` exit 0, 24/24 tests, `npm run build` exit 0, demo typecheck exit 0. No re-render needed; the rendered scene did not change. Still pending: live on-device and cloud inference proof, Firebase project and App Check setup, offline reload, phone-width visual review, automated contrast, user testing, deployment and submission.
+
+Previous change (Nov 15, 2026): UI only — twilight archive skin with deep plum space, dotted field and orbital rings, a luminous logo orbit, filled step circuit, dark glass cards and fields, holographic photo corners, ivory-to-gold primary actions and HUD corner details. Labels, flow and approval rules are unchanged; reduced motion turns off the orbit, status ping and entrance. Checks run: typecheck exit 0, 24/24 tests, build exit 0.
+
+Still pending: live on-device and cloud inference proof, Firebase project and App Check setup, offline reload test, user testing, deployment and submission.
+
+Demo package (Nov 14, 2026): futuristic glass skin applied with the requested `ui-ux-futuristic-designer` skill; logo wired into the app, favicon and README. Architecture diagram lives in `docs/diagrams/` (HTML/SVG/2x PNG, diagram-design self-check OK). Synthetic fixtures live in `assets/generated/` with a README. The Remotion demo source is in `demo/`; narration is piper `en_GB-jenny_dioco-medium` in `demo/narration.json`, rendered track 129.4 s. Final check recorded: app typecheck 0, 24/24 tests, build 0; MP4 at `docs/media/kinwoven-demo.mp4` is 130.0 s, 1920×1080 H.264 with stereo AAC, mean audio −18.8 dB. README links and diagram files verified present. The remaining gaps are the live Firebase/inference proof, phone-width visual review, deployment and submission.

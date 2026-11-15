@@ -1,0 +1,50 @@
+[
+  {
+    "id": "hook",
+    "start": 0,
+    "window": 8.6,
+    "text": "Every photo has a story. The part that matters is usually the part nobody wrote down."
+  },
+  {
+    "id": "problem",
+    "start": 9,
+    "window": 14.4,
+    "text": "A picture can hold the kitchen table and the radio. It cannot hold why Sunday mattered, or what she hummed while the tea went cold."
+  },
+  {
+    "id": "capture",
+    "start": 24,
+    "window": 16.4,
+    "text": "Kinwoven begins with one photo and a few plain notes. They stay in this browser, on this device. No account, and no upload until the family decides to share."
+  },
+  {
+    "id": "question",
+    "start": 41,
+    "window": 15.4,
+    "text": "Then it asks one thing the photo cannot show. The family answers in their own words, and chooses where the draft is made. On this device by default, or the cloud for one draft, behind App Check."
+  },
+  {
+    "id": "draft",
+    "start": 57,
+    "window": 21.4,
+    "text": "The draft uses only those facts. No invented names, dates or feelings. Anything uncertain becomes a question. The family edits the words and approves one exact version, bound to a fingerprint of the story and the photo. A later edit clears that approval."
+  },
+  {
+    "id": "play",
+    "start": 79,
+    "window": 13.4,
+    "text": "Playback shows only the approved version, one line at a time, with large controls and a pause whenever it is needed."
+  },
+  {
+    "id": "architecture",
+    "start": 93,
+    "window": 25.4,
+    "text": "Under the surface, photo and notes stay in IndexedDB. The draft engine runs on-device first. The dashed path is the opt-in cloud route through App Check. Approval binds the revision to a SHA-256 hash. Only an explicit share writes a published snapshot, and family devices read that alone."
+  },
+  {
+    "id": "outro",
+    "start": 119,
+    "window": 10.4,
+    "text": "Kinwoven. The photo is saved. The story is still yours to tell."
+  }
+]
