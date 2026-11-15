@@ -1,6 +1,6 @@
 # Persistent progress
 
-Build status: developer-ready application implemented; live model inference, Firebase setup, hardware tests, user testing, deployment and submission remain pending.
+Build status: developer-ready application implemented; on-device inference is proven on Chrome 157 through Modal with a test-only Firebase config. Cloud inference, App Check, a real Firebase project, app-level offline behavior, user testing, deployment and submission remain pending.
 
 Public release, Nov 15, 2026: published the source, docs and demo at
 https://github.com/yablokolabs/kinwoven on the public `main` branch. Pre-push audit found no
@@ -12,16 +12,22 @@ shows only the brand, promise, local-first chip and synthetic-photo disclosure, 
 attribution. Checks before the push: `npm run typecheck` exit 0, 24/24 tests, `npm run build` exit 0,
 demo `npx tsc -p .` exit 0. No video re-render was needed because the rendered component did not change.
 
+On-device proof, Nov 15, 2026 (Modal): ran the actual Kinwoven UI with the synthetic kitchen-table photo and notes in branded Google Chrome 157.0.8103.78 on Linux. The function used the CPU backend with no GPU; Modal reported 24 vCPU, 171.83 GiB visible memory and 381.47 GB free. Chrome reported performance class 8, 0 MB VRAM and 0 model crashes. The model was v3Nano 2025.08.14.1358 (component 2025.8.21.1028). `LanguageModel.availability()` returned `downloadable`; the raw Chrome Prompt API returned `local-ready` online (806 ms) and offline (861 ms). Through the app and Firebase AI Logic SDK, the SDK reported `on_device`; the normalized UI showed `On-device draft · on-device Chrome model · 21.7s · prompt kinwoven-draft-v1` and `Drafted on this device in 21.7s.` No Firebase or Google request occurred during the draft; the request trace contains only local assets and a blob URL. Evidence: `docs/media/on-device-modal.png` and `docs/media/on-device-modal-evidence.json`.
+
+Bugs found by the proof and fixed: the SDK returned lowercase `on_device` while the app compared uppercase `ON_DEVICE`, so a valid local result was rejected; `normalizeInferenceSource` now normalizes both cases and `assertSourceAllowed` rejects unknown sources. The on-device model also omitted `sourceFactIds`; the model now uses the same structured-output constraint on device and cloud, while zod still validates every cited fact id. Checks after the fix: `npm run typecheck` exit 0, 26/26 tests, `npm run build` exit 0.
+
+Proof limits: the Firebase web config was a local test-only placeholder. No real Firebase project, App Check enforcement, cloud inference, sign-in, Firestore or Storage call was configured or proven. An app-level offline retry timed out after 300 s; raw Chrome offline passed. The accepted model draft added unsupported time-of-day and generic praise/filler; source ids were valid, but semantic factuality is not guaranteed and the family must edit and approve. The screen used the synthetic fixture, not family media.
+
 - [x] Scope grandparent-friendly memory story and hybrid inference behavior.
 - [x] Prepare build, privacy, evaluation and demo guidance.
-- [ ] M0 — prove actual local and cloud SDK requests.
-- [ ] M1 — accessible capture and offline local persistence. Built; capture flow exercised in moli, reopening across a reload not yet tested.
-- [ ] M2 — factual, source-linked hybrid drafts. Built with schema and source checks; live model inference still unproven.
+- [ ] M0 — prove actual local and cloud SDK requests. On-device proven through the app; cloud proof pending.
+- [ ] M1 — accessible capture and offline local persistence. Built; capture flow exercised in moli. App-level offline drafting timed out; reopening across a reload not yet tested.
+- [ ] M2 — factual, source-linked hybrid drafts. Built with structured output and source checks; on-device inference proven, cloud inference and semantic factuality remain unproven.
 - [ ] M3 — revision approval and story playback. Built; approval and invalidation unit-tested, player driven in moli.
 - [ ] M4 — explicit authenticated family sharing and access checks.
 - [ ] M5 — real usability evaluation, demo and submission artifacts.
 
-Next action: run the M0 proof on supported Chrome hardware, then test offline reopening. Name availability remains unverified.
+Next action: configure a real Firebase project with enforced App Check for the cloud proof, then debug app-level offline behavior and test reopening. Name availability remains unverified.
 
 Attribution audit, Nov 14, 2026: repository contains documentation and brand PNGs only, no application UI. Searched README, all docs and asset notes for footer, powered-by, badge, credit and copyright text. No footer attribution exists; the product rule is recorded in AGENTS.md and asset credits stay in docs/SOURCES.md and assets/README.md. Both brand PNGs were downscaled and viewed: logo carries only the wordmark and tagline, icon only the mark, no footer or credit text baked in.
 
@@ -41,10 +47,10 @@ UI futuristic pass 2, Nov 15, 2026: moved the soft-tech skin into a twilight arc
 
 UI recapture and demo re-render, Nov 15, 2026: recaptured `welcome`, `capture`, `question`, `draft` and `play` at 1920×1080 from the running app in Chrome for Testing 159 through Playwright, using the same synthetic kitchen-table photo, three notes, tea/radio answer and labelled plain-draft path as the previous demo. The draft frame keeps the source-notes card, plain-draft provenance line and approval controls in view. Re-rendered the Remotion film with the existing narration and timeline. Verified `npx tsc -p .` in `demo/` exit 0; preview stills at 30, 48, 65 and 85 s reviewed before the full render; frames from the encoded file at 30, 48, 65, 85, 100 and 122 s reviewed after it. Final MP4: 130.005 s, 1920×1080 H.264 at 30 fps, AAC stereo 48 kHz, 56,055,603 bytes (3.45 Mb/s), mean audio −18.8 dB and peak −2.9 dB; full decode exit 0. Delivered at `docs/media/kinwoven-demo.mp4`; the screenshot PNGs in `demo/public/shots/` are replaced with the twilight UI captures. No browser visual review at phone width and no automated contrast measurement were run.
 
-Not proven: no Chrome 139+ on this machine, so no on-device model inference and no `ON_DEVICE` result; no Firebase project, App Check key or family space, so no cloud inference, sign-in, Firestore or Storage calls; IndexedDB reopening across a reload was not exercised; no user testing, deployment or submission.
+Not proven: cloud inference, App Check enforcement, a real Firebase project, sign-in, Firestore or Storage calls; app-level offline behavior; IndexedDB reopening across a reload; semantic factuality of model drafts; user testing, deployment and submission.
 
-Blockers: supported Chrome desktop hardware; a Firebase project with App Check configured; operator authorization for any deployment or publication.
+Blockers: a real Firebase project with App Check configured for cloud proof; app-level offline behavior; operator authorization for deployment or submission.
 
-Next action: run M0 on supported Chrome, log `inferenceSource` plus a network trace for both local and cloud requests, and store redacted evidence paths here.
+Next action: configure the cloud proof, then fix and re-test app-level offline drafting.
 
 Checkpoint template: timestamp; commit; implemented behavior; actual test commands/results; device/browser and inferenceSource; redacted evidence paths; unresolved blocker; next concrete action. No family content or secrets in checkpoints.

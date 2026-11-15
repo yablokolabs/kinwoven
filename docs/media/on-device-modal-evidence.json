@@ -1,0 +1,121 @@
+{
+  "scope": "On-device only. The Firebase web config was a local test-only placeholder; no Firebase project, App Check, cloud inference, or cloud data was used.",
+  "evidence": {
+    "chrome": "Google Chrome 157.0.8103.78",
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+    "python": "3.12.10",
+    "cpu_count": 24,
+    "memory_gib": 171.83,
+    "profile_disk_gib": 381.47,
+    "firebase_config": "local test-only placeholder; no cloud project or App Check",
+    "online": {
+      "ok": true,
+      "heading": "Read your story",
+      "provenance": "On-device draft \u00b7 on-device Chrome model \u00b7 21.7s \u00b7 prompt kinwoven-draft-v1",
+      "status": "Drafted on this device in 21.7s.",
+      "caption": "A simple Sunday morning tradition is remembered from photographs.",
+      "story": "The family ate together at a table in the kitchen every Sunday. The radio was always playing, and Mum would hum along while she poured tea. It's nice to remember the sounds of the day! What do you remember about this day that the photo cannot show? Perhaps you remember what the radio was playing, or what Mum hummed! We appreciate all of your wonderful memories."
+    },
+    "page_errors": [],
+    "online_requests": [],
+    "requests_during_draft": [
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8770/",
+        "type": "document"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8770/assets/index-ANdxwptR.js",
+        "type": "script"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8770/assets/index-2jWbzLmn.css",
+        "type": "stylesheet"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8770/assets/instrument-serif-latin-400-normal-DnYpCC2O.woff2",
+        "type": "font"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8770/assets/space-grotesk-latin-wght-normal-BhU9QXUp.woff2",
+        "type": "font"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8770/icon.png",
+        "type": "image"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8770/icon.png",
+        "type": "other"
+      },
+      {
+        "method": "GET",
+        "url": "blob:http://127.0.0.1:8770/d2bf01ba-79b7-45e3-a62e-480d4791ede1",
+        "type": "image"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8770/assets/index.esm-ByDZ9fQI.js",
+        "type": "script"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8770/assets/index.esm-U47DDh1i.js",
+        "type": "script"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8770/assets/index.esm-FLa7naCk.js",
+        "type": "script"
+      }
+    ],
+    "console": [
+      "info: This page uses Chrome's Built-In AI features (LanguageModel)! We're always improving our models; please submit your feedback here: https://issues.chromium.org/issues/new?component=1583624",
+      "info: [on-device probe] requested=ONLY_ON_DEVICE actual=ON_DEVICE"
+    ],
+    "draft_text": {
+      "caption": "A simple Sunday morning tradition is remembered from photographs.",
+      "story": "The family ate together at a table in the kitchen every Sunday. The radio was always playing, and Mum would hum along while she poured tea. It's nice to remember the sounds of the day! What do you remember about this day that the photo cannot show? Perhaps you remember what the radio was playing, or what Mum hummed! We appreciate all of your wonderful memories."
+    },
+    "model": {
+      "local_state_optimization_guide": {
+        "last_version": "157.0.8103.78",
+        "model_crash_count": 0,
+        "performance_class": 8,
+        "performance_class_gpu_id": "0:0:",
+        "performance_class_version": "157.0.8103.78",
+        "vram_mb": "0"
+      },
+      "manifests": [
+        {
+          "path": "/data/profile/OptGuideOnDeviceModel/2025.8.21.1028/manifest.json",
+          "data": {
+            "manifest_version": 2,
+            "name": "Optimization Guide On Device Model",
+            "version": "2025.8.21.1028",
+            "BaseModelSpec": {
+              "name": "v3Nano",
+              "version": "2025.08.14.1358",
+              "supported_performance_hints": [
+                3
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "notes": [
+    "SDK returned lowercase on_device; the app now normalizes the source before policy checks.",
+    "Structured output now constrains caption, story, uncertain and sourceFactIds on both device and cloud paths.",
+    "No Firebase or Google request occurred during the draft; requests were local assets and a blob URL only.",
+    "The raw Chrome Prompt API also completed offline; the app-level offline retry timed out after 300 s and remains unproven.",
+    "The accepted model draft contained unsupported time-of-day and generic filler. Source ids were valid but semantic factuality still needs review and family approval."
+  ]
+}

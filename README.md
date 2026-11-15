@@ -25,19 +25,24 @@ The left zone never uploads. The dashed route is the only cloud path and is chos
 Approval binds a revision to a SHA-256 hash. Sharing is a separate, confirmed action that writes
 an immutable snapshot for family devices to read.
 
-## Status: developer-ready, not demo-proven
+## Status: on-device-proven, cloud-unproven
 
 - Working: local capture, notes, question, editable draft, revision-bound approval, story player,
   IndexedDB persistence, and a publishing path for an explicitly approved snapshot.
-- Implemented but unproven here: live Firebase AI Logic drafting, App Check attestation, anonymous
-  sign-in, Firestore/Storage publishing. This machine has no supported Chrome and no Firebase
-  project, so no live local or cloud inference has been observed. No result is claimed from a
-  fixture.
+- Proven: on-device drafting through Firebase AI Logic in branded Chrome 157 on a Modal Linux CPU
+  container, using the synthetic fixture. The SDK reported `on_device`; the UI rendered the draft as
+  on-device and no Firebase or Google request occurred during the draft. See the
+  [proof screenshot](docs/media/on-device-modal.png) and [redacted evidence](docs/media/on-device-modal-evidence.json).
+  The Firebase config was a local test-only placeholder; this is not a real project or App Check proof.
+- Implemented but unproven: cloud inference, App Check attestation with a real Firebase project,
+  anonymous sign-in, Firestore/Storage publishing, and app-level offline drafting. The raw Chrome
+  Prompt API completed offline, but the app-level retry timed out.
 - The interface and the full local flow (photo, notes, question, draft, approval, playback) were
-  rendered and driven in moli 1.1.24, a Rust headless engine, not Chrome. That exercises the app and
-  the approval path; it does not exercise WebGPU, the Chrome Prompt API or any Firebase service.
+  rendered and driven in moli 1.1.24 and again in actual Chrome during the on-device proof.
 - The plain draft path (`kind: 'template'`) exists so the product stays usable without a model. It is
   labelled in the UI and is not AI output.
+- The on-device model can add generic filler or details not in the notes. Source ids are checked, but
+  semantic factuality is not guaranteed; every draft still needs family editing and approval.
 
 Checks actually run are listed in [docs/PROGRESS.md](docs/PROGRESS.md). Setup for a reviewer with
 supported hardware is below.
@@ -115,6 +120,7 @@ storage.rules        private family media, member-only, bounded size and type
 
 ## Known limits
 
+- On-device model drafts can contain unsupported filler; human editing and approval are required.
 - English is the only tested language. No speech capture, native Android, TV app or multilingual
   promise is made.
 - Playback uses one photo per memory; multi-photo stories are not built.

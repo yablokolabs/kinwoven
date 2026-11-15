@@ -1,7 +1,12 @@
-import type { DraftBody, InferenceSource, Provenance } from '../types';
+import type { DraftBody, Provenance } from '../types';
 import { cloudModel, isFirebaseConfigured } from './config';
 import { getFirebaseApp } from './firebase';
-import { assertSourceAllowed, modeForChoice, type PrivacyChoice } from './policy';
+import {
+  assertSourceAllowed,
+  modeForChoice,
+  normalizeInferenceSource,
+  type PrivacyChoice,
+} from './policy';
 import { PROMPT_VERSION, SYSTEM_INSTRUCTION, buildDraftPrompt } from './prompt';
 import { extractJsonObject, parseDraftBody } from './schema';
 import type { PromptInput } from './prompt';
@@ -45,10 +50,17 @@ export async function draftWithAi({
     );
   }
 
-  const [{ getAI, getGenerativeModel, GoogleAIBackend, InferenceMode }, app] = await Promise.all([
-    import('firebase/ai'),
-    getFirebaseApp(),
-  ]);
+  const [{ getAI, getGenerativeModel, GoogleAIBackend, InferenceMode, Schema }, app] =
+    await Promise.all([import('firebase/ai'), getFirebaseApp()]);
+
+  const draftResponseSchema = Schema.object({
+    properties: {
+      caption: Schema.string(),
+      story: Schema.string(),
+      uncertain: Schema.array({ items: Schema.string() }),
+      sourceFactIds: Schema.array({ items: Schema.string() }),
+    },
+  });
 
   const ai = getAI(app, { backend: new GoogleAIBackend() });
   const mode = modeForChoice(choice);
@@ -57,8 +69,15 @@ export async function draftWithAi({
       mode === 'ONLY_ON_DEVICE'
         ? InferenceMode.ONLY_ON_DEVICE
         : InferenceMode.PREFER_ON_DEVICE,
-    inCloudParams: { model: cloudModel },
+    inCloudParams: {
+      model: cloudModel,
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: draftResponseSchema,
+      },
+    },
     onDeviceParams: {
+      promptOptions: { responseConstraint: draftResponseSchema },
       createOptions: {
         expectedInputs: [{ type: 'text', languages: ['en'] }],
         expectedOutputs: [{ type: 'text', languages: ['en'] }],
@@ -83,7 +102,7 @@ export async function draftWithAi({
   );
   const durationMs = Math.round(performance.now() - startedAt);
 
-  const source = result.response.inferenceSource as InferenceSource;
+  const source = normalizeInferenceSource(result.response.inferenceSource);
   assertSourceAllowed(choice, source);
 
   const text = result.response.text();

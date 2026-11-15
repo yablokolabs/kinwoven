@@ -9,7 +9,9 @@ The guide uses `getAI`, `GoogleAIBackend`, `getGenerativeModel` and `InferenceMo
 - Allow cloud for this draft: PREFER_ON_DEVICE. Consent applies to the displayed photo/notes and revision, not all future memories.
 - Testing: ONLY_IN_CLOUD can separately verify cloud setup. Record this as forced cloud proof. Demonstrate actual fallback on an unsupported environment as an additional check.
 
-Use `result.response.inferenceSource` to record ON_DEVICE or IN_CLOUD. Never derive it from the requested mode or network icon. Keep timing from monotonic client measurements. A returned local result does not prove the app made no other network calls; also inspect the request trace and upload behavior.
+Use `result.response.inferenceSource` to record ON_DEVICE or IN_CLOUD. The Chrome 157 SDK returned lowercase `on_device`; normalize the value before policy checks or display, and reject an unrecognized source. Never derive it from the requested mode or network icon. Keep timing from monotonic client measurements. A returned local result does not prove the app made no other network calls; also inspect the request trace and upload behavior.
+
+Configure structured output on both paths: `inCloudParams.generationConfig` needs `responseMimeType: 'application/json'` and `responseSchema`; `onDeviceParams.promptOptions` needs the same schema as `responseConstraint`. Keep the independent zod/source check because the constraint does not prove semantic factuality.
 
 Start with short text-only tasks using confirmed notes on both execution paths. Images may be added through supported JPEG/PNG input after real capability checks. Never claim video analysis or local audio transcription from this SDK. Validate output schemas on both paths and bound input size. On model failure, preserve notes and allow manual editing. Do not substitute a different AI provider.
 

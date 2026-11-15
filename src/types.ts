@@ -13,7 +13,7 @@ export type DraftBody = {
   sourceFactIds: string[];
 };
 
-export type InferenceSource = 'ON_DEVICE' | 'IN_CLOUD';
+export type InferenceSource = 'ON_DEVICE' | 'IN_CLOUD' | 'UNKNOWN';
 
 export type Provenance =
   | {

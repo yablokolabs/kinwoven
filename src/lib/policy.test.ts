@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assertSourceAllowed, modeForChoice } from './policy';
+import { assertSourceAllowed, modeForChoice, normalizeInferenceSource } from './policy';
 import { templateDraft } from './template';
 
 describe('privacy policy', () => {
@@ -11,12 +11,24 @@ describe('privacy policy', () => {
     expect(modeForChoice('cloud')).toBe('PREFER_ON_DEVICE');
   });
 
+  it('normalizes the lowercase SDK source values', () => {
+    expect(normalizeInferenceSource('on_device')).toBe('ON_DEVICE');
+    expect(normalizeInferenceSource('in_cloud')).toBe('IN_CLOUD');
+    expect(normalizeInferenceSource('ON_DEVICE')).toBe('ON_DEVICE');
+    expect(normalizeInferenceSource('something-else')).toBe('UNKNOWN');
+  });
+
   it('accepts an on-device result for a local-only draft', () => {
     expect(() => assertSourceAllowed('local', 'ON_DEVICE')).not.toThrow();
+    expect(() => assertSourceAllowed('local', normalizeInferenceSource('on_device'))).not.toThrow();
   });
 
   it('rejects a cloud result for a local-only draft', () => {
     expect(() => assertSourceAllowed('local', 'IN_CLOUD')).toThrow(/stay on this device/);
+  });
+
+  it('rejects an unknown source', () => {
+    expect(() => assertSourceAllowed('cloud', 'UNKNOWN')).toThrow(/did not report/);
   });
 
   it('accepts either source when the family allowed cloud for that draft', () => {
