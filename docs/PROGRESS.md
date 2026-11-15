@@ -2,6 +2,8 @@
 
 Build status: developer-ready application implemented and deployed at https://kinwoven-proof.web.app. Prompt v3 is live. On-device and cloud Firebase AI Logic inference are both proven with v3; the cloud path completed an App Check reCAPTCHA Enterprise token exchange, and the same request without App Check returned 401. App-level offline behavior, sign-in, family sharing, user testing and submission remain pending.
 
+Devpost story, Nov 15, 2026: replaced the placeholder `docs/DEVPOST_PROJECT_STORY.md` with the verified narrative, separate on-device/cloud proof, App Check 401→200 result, 2:40 demo reference, judge testing steps and explicit limits. No product code changed. Checks: live app returned 200; demo file present; `git diff --check` clean; no “Gemini Nano 4” claim.
+
 Public release, Nov 15, 2026: published the source, docs and demo at
 https://github.com/yablokolabs/kinwoven on the public `main` branch. Pre-push audit found no
 `.env.local` (only `.env.example` placeholders), no private transcripts, family media or signed links;
