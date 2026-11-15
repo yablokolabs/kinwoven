@@ -10,9 +10,9 @@ confirms the words; playback uses only the version they approved.
 
 ## See it work
 
-[Watch the two-minute demo](docs/media/kinwoven-demo.mp4) with sound on. It follows one
-synthetic photo from capture to approval, then shows the live on-device and cloud runtime proof,
-the App Check rejection/success check and the deployed URL. The photo in the demo and the still
+[Watch the 2:40 demo](docs/media/kinwoven-demo.mp4) with sound on. It follows one
+synthetic photo from capture to approval, then shows a dedicated 30-second on-device proof, the live
+cloud path, the App Check rejection/success check and the deployed URL. The photo in the demo and the still
 fixtures in `assets/generated/` are AI-generated test material, not family media; the film labels
 the photo on screen. The on-device segment is Chrome 157 in a Modal CPU container, not a family
 laptop.

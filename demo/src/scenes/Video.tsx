@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, Img, OffthreadVideo, Sequence, staticFile, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Img, OffthreadVideo, Sequence, interpolate, staticFile, useVideoConfig} from 'remotion';
 import {Chip, Eyebrow, Glass, Pop, Title, hexA} from '../components/ui';
 import {SOFT, useT} from '../hooks';
 import {C, F} from '../theme';
@@ -474,10 +474,224 @@ export const DraftDemo: React.FC = () => (
   </AbsoluteFill>
 );
 
+export const OnDeviceProof: React.FC = () => {
+  const {fps, frame} = useT();
+  const t = frame / fps;
+  const doneAt = 25;
+  const waited = Math.min(25.8, t);
+  const returned = t >= doneAt;
+  const progress = interpolate(t, [0, doneAt], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const clock = `00:${waited.toFixed(1).padStart(4, '0')}`;
+  const stages = [
+    {label: 'Photo and notes stay in this browser', at: 0},
+    {label: 'Chrome built-in model drafts', at: 1},
+    {label: 'Draft returns for family review', at: doneAt},
+  ];
+  const activeStage = returned ? 2 : t >= 1 ? 1 : 0;
+
+  return (
+    <AbsoluteFill style={{padding: '84px 120px 76px'}}>
+      <div style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 30}}>
+        <Header eyebrow="Step 4 · On-device proof" title="Watch the model run [here]." size={54} />
+        <Pop at={0.8} y={12}>
+          <Chip tone="green" size={17}>
+            Live recording · 1×
+          </Chip>
+        </Pop>
+      </div>
+
+      <div style={{display: 'flex', gap: 32, marginTop: 18, alignItems: 'stretch'}}>
+        <Pop at={0.7} y={44} style={{width: 1080}}>
+          <div
+            style={{
+              overflow: 'hidden',
+              borderRadius: 22,
+              border: '1px solid rgba(255,246,234,0.24)',
+              background: '#160c14',
+              boxShadow: `0 30px 90px rgba(0,0,0,0.58), 0 0 70px ${hexA(C.green, 0.09)}`,
+            }}
+          >
+            <div
+              style={{
+                height: 34,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 7,
+                padding: '0 14px',
+                background: 'rgba(255,246,234,0.06)',
+                borderBottom: '1px solid rgba(255,246,234,0.09)',
+              }}
+            >
+              {['#d98a6a', '#d9b06a', '#8fbfa3'].map((color) => (
+                <span key={color} style={{width: 8, height: 8, borderRadius: 99, background: color}} />
+              ))}
+              <span style={{marginLeft: 8, fontFamily: F.mono, fontSize: 11, color: C.muted}}>
+                kinwoven-proof.web.app
+              </span>
+              <span
+                style={{
+                  marginLeft: 'auto',
+                  fontFamily: F.mono,
+                  fontSize: 10,
+                  letterSpacing: 1.4,
+                  color: C.green,
+                }}
+              >
+                ● REC
+              </span>
+            </div>
+            <div style={{position: 'relative', width: 1080, height: 608, overflow: 'hidden', background: '#f8f2e8'}}>
+              <OffthreadVideo
+                src={staticFile('proof/on-device.webm')}
+                startFrom={Math.round(6 * fps)}
+                endAt={Math.round(36 * fps)}
+                muted
+                style={{position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover'}}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 16,
+                  top: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '7px 12px',
+                  borderRadius: 999,
+                  background: 'rgba(16,7,14,0.82)',
+                  border: `1px solid ${hexA(C.green, 0.45)}`,
+                  fontFamily: F.mono,
+                  fontSize: 11,
+                  letterSpacing: 1.2,
+                  color: C.green,
+                }}
+              >
+                <span style={{width: 7, height: 7, borderRadius: 99, background: C.green}} />
+                LOCAL ONLY
+              </div>
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 16,
+                  top: 14,
+                  padding: '7px 12px',
+                  borderRadius: 999,
+                  background: 'rgba(16,7,14,0.82)',
+                  border: `1px solid ${hexA(C.ink, 0.18)}`,
+                  fontFamily: F.mono,
+                  fontSize: 11,
+                  letterSpacing: 1.2,
+                  color: C.ink,
+                }}
+              >
+                {returned ? 'DRAFT RETURNED' : 'CHROME 157 · 25.8 s'}
+              </div>
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 'auto 0 0',
+                  padding: '70px 18px 15px',
+                  background: 'linear-gradient(180deg, rgba(16,7,14,0), rgba(16,7,14,0.94))',
+                }}
+              >
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16}}>
+                  <span style={{fontFamily: F.mono, fontSize: 11, letterSpacing: 1.4, color: C.muted}}>
+                    {returned ? 'DRAFT READY · NO CLOUD CALL' : 'REAL-TIME WAIT · NO CLOUD CALL'}
+                  </span>
+                  <span style={{fontFamily: F.mono, fontSize: 14, color: returned ? C.green : C.coralSoft}}>
+                    {returned ? '25.8 s' : clock}
+                  </span>
+                </div>
+                <div style={{height: 4, marginTop: 9, borderRadius: 99, background: 'rgba(255,246,234,0.18)', overflow: 'hidden'}}>
+                  <div
+                    style={{
+                      width: `${progress * 100}%`,
+                      height: '100%',
+                      background: returned ? C.green : C.coralSoft,
+                      boxShadow: `0 0 12px ${returned ? C.green : C.coralSoft}`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Pop>
+
+        <div style={{width: 440, display: 'flex', flexDirection: 'column', gap: 14}}>
+          <Pop at={1.3} y={26} style={{flex: 1}}>
+            <Glass style={{padding: '20px 22px', height: '100%'}} glow={C.green} active={returned ? 0.5 : 0.22}>
+              <div style={{fontFamily: F.mono, fontSize: 11, letterSpacing: 1.5, color: C.green}}>
+                ON-DEVICE STATUS
+              </div>
+              <div style={{fontFamily: F.display, fontWeight: 800, fontSize: 34, color: C.ink, marginTop: 6}}>
+                {returned ? 'Draft returned' : 'Waiting on Chrome'}
+              </div>
+              <div style={{fontFamily: F.body, fontSize: 15, lineHeight: 1.4, color: C.muted, marginTop: 4}}>
+                {returned
+                  ? '25.8 s on this CPU container. The family edits and approves next.'
+                  : 'The built-in model is working through the answer. Nothing is uploaded.'}
+              </div>
+              <div style={{marginTop: 16, display: 'flex', flexDirection: 'column', gap: 9}}>
+                {stages.map((stage, i) => {
+                  const active = i <= activeStage;
+                  return (
+                    <div key={stage.label} style={{display: 'flex', alignItems: 'center', gap: 9}}>
+                      <span
+                        style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: 99,
+                          background: active ? C.green : 'rgba(255,246,234,0.18)',
+                          boxShadow: active ? `0 0 10px ${C.green}` : undefined,
+                        }}
+                      />
+                      <span style={{fontFamily: F.body, fontSize: 14, color: active ? C.ink : C.faint}}>
+                        {stage.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </Glass>
+          </Pop>
+
+          <Pop at={2.1} y={26}>
+            <Glass style={{padding: '18px 22px'}} glow={C.green} active={0.35}>
+              <div style={{fontFamily: F.mono, fontSize: 11, letterSpacing: 1.5, color: C.green}}>
+                CLOUD INFERENCE REQUESTS
+              </div>
+              <div style={{display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 2}}>
+                <span style={{fontFamily: F.display, fontWeight: 800, fontSize: 58, color: C.green, lineHeight: 1}}>
+                  0
+                </span>
+                <span style={{fontFamily: F.body, fontSize: 14, color: C.muted, lineHeight: 1.35}}>
+                  No Firebase AI Logic or inference host called during this draft.
+                </span>
+              </div>
+            </Glass>
+          </Pop>
+
+          <Pop at={3.1} y={24}>
+            <div style={{fontFamily: F.mono, fontSize: 10, lineHeight: 1.7, letterSpacing: 0.7, color: C.faint}}>
+              SOURCE · kinwoven-proof.web.app<br />
+              PROMPT · kinwoven-draft-v3<br />
+              CAPTURE · 37.96 s excerpt, 30 s at 1×<br />
+              FIXTURE · synthetic kitchen table
+            </div>
+          </Pop>
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
 export const PlayDemo: React.FC = () => (
   <AbsoluteFill style={{padding: pad}}>
     <div style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 30}}>
-      <Header eyebrow="Step 4 · Play" title="Play it together." size={62} />
+      <Header eyebrow="Step 5 · Play" title="Play it together." size={62} />
       <Pop at={0.8} y={12}>
         <Chip tone="coral" size={18}>
           Approved version only
