@@ -7,3 +7,7 @@ coverage/
 .firebase/
 *.log
 .DS_Store
+
+# Python probe bytecode
+__pycache__/
+*.pyc

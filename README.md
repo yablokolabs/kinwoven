@@ -13,7 +13,8 @@ confirms the words; playback uses only the version they approved.
 [Watch the two-minute demo](docs/media/kinwoven-demo.mp4) with sound on. It follows one
 synthetic photo from capture to approval, then ends on the architecture below. The photo in the
 demo and the still fixtures in `assets/generated/` are AI-generated test material, not family
-media; the film labels the photo on screen.
+media; the film labels the photo on screen. The published film predates the v2 runtime-proof
+update and still includes the labelled plain-draft segment; a new cut awaits a real cloud capture.
 
 ## Architecture
 
@@ -31,9 +32,10 @@ an immutable snapshot for family devices to read.
   IndexedDB persistence, and a publishing path for an explicitly approved snapshot.
 - Proven: on-device drafting through Firebase AI Logic in branded Chrome 157 on a Modal Linux CPU
   container, using the synthetic fixture. The SDK reported `on_device`; the UI rendered the draft as
-  on-device and no Firebase or Google request occurred during the draft. See the
-  [proof screenshot](docs/media/on-device-modal.png) and [redacted evidence](docs/media/on-device-modal-evidence.json).
-  The Firebase config was a local test-only placeholder; this is not a real project or App Check proof.
+  `prompt kinwoven-draft-v2` in 25.6 s and no Firebase or Google request occurred during the draft.
+  See the [proof screenshot](docs/media/on-device-modal.png) and
+  [redacted evidence](docs/media/on-device-modal-evidence.json). The Firebase config was a local
+  test-only placeholder; this is not a real project or App Check proof.
 - Implemented but unproven: cloud inference, App Check attestation with a real Firebase project,
   anonymous sign-in, Firestore/Storage publishing, and app-level offline drafting. The raw Chrome
   Prompt API completed offline, but the app-level retry timed out.
@@ -41,11 +43,13 @@ an immutable snapshot for family devices to read.
   rendered and driven in moli 1.1.24 and again in actual Chrome during the on-device proof.
 - The plain draft path (`kind: 'template'`) exists so the product stays usable without a model. It is
   labelled in the UI and is not AI output.
-- The on-device model can add generic filler or details not in the notes. Source ids are checked, but
-  semantic factuality is not guaranteed; every draft still needs family editing and approval.
+- The on-device model can add details not in the notes. Source ids are checked, and the draft screen
+  flags a short list of unsupported time, people, feeling and filler words for correction. That check
+  is not a semantic fact checker; every draft still needs family reading, editing and approval.
 
-Checks actually run are listed in [docs/PROGRESS.md](docs/PROGRESS.md). Setup for a reviewer with
-supported hardware is below.
+Checks actually run are listed in [docs/PROGRESS.md](docs/PROGRESS.md). The on-device Modal capture
+is reproducible with [the probe and runbook](tools/modal-on-device/README.md). Setup for a reviewer
+with supported hardware is below.
 
 ## Run it
 
@@ -56,8 +60,9 @@ npm test
 npm run build
 ```
 
-No Firebase project is needed to try capture, drafting, approval and playback on one device. The app
-opens straight into the local flow; there is no account step.
+No Firebase project is needed to try capture, a plain draft, approval and playback on one device.
+The app opens straight into the local flow; there is no account step. Model drafting needs the
+Firebase values below.
 
 ## Connect Firebase (needed for AI drafting and family sharing)
 
@@ -110,17 +115,21 @@ src/
   lib/revision.ts    snapshot creation, approval validity, hashing
   lib/inference.ts   Firebase AI Logic hybrid request, readiness, source checking
   lib/policy.ts      privacy choice → InferenceMode, local-only source guard
+  lib/prompt.ts      versioned system instruction and fact-only draft prompt
   lib/schema.ts      zod validation of untrusted model output
+  lib/factuality.ts  short unsupported-word review for model drafts
   lib/template.ts    labelled non-AI draft from the family's own words
   lib/share.ts       approved-snapshot publishing with a membership preflight
   screens/           Welcome, Capture, Question, Draft, Play, Share
+tools/modal-on-device/  reproducible Chrome CPU proof and runbook
 firestore.rules      membership-only access; published snapshots are immutable
 storage.rules        private family media, member-only, bounded size and type
 ```
 
 ## Known limits
 
-- On-device model drafts can contain unsupported filler; human editing and approval are required.
+- On-device model drafts can contain unsupported filler. The review card catches a short list of
+  common words, not every inference; human editing and approval are required.
 - English is the only tested language. No speech capture, native Android, TV app or multilingual
   promise is made.
 - Playback uses one photo per memory; multi-photo stories are not built.

@@ -71,6 +71,7 @@ export async function draftWithAi({
         : InferenceMode.PREFER_ON_DEVICE,
     inCloudParams: {
       model: cloudModel,
+      systemInstruction: SYSTEM_INSTRUCTION,
       generationConfig: {
         responseMimeType: 'application/json',
         responseSchema: draftResponseSchema,

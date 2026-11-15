@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { factualityCategoryLabel, findUnsupportedDetails } from '../lib/factuality';
 import type { Memory } from '../types';
 
 type Props = {
@@ -40,6 +41,9 @@ export default function Draft({
 
   const provenance = memory.provenance;
   const sourceNotes = memory.facts.filter((fact) => draft.sourceFactIds.includes(fact.id));
+  const reviewSource = [...memory.facts.map((fact) => fact.text), memory.answer].filter(Boolean);
+  const reviewFlags =
+    provenance?.kind === 'model' ? findUnsupportedDetails(caption, story, reviewSource) : [];
   const edited = caption !== draft.caption || story !== draft.story;
   const approved = Boolean(memory.approval) && !edited;
 
@@ -75,6 +79,26 @@ export default function Draft({
           onChange={(event) => setStory(event.target.value)}
         />
       </label>
+
+      {reviewFlags.length > 0 && (
+        <div className="notice notice-review" role="status">
+          <p>
+            <strong>Check before approving.</strong> These words are in the draft but not in the
+            notes or answer you gave. If they are wrong, edit the caption or story above.
+          </p>
+          <ul className="plain-list">
+            {reviewFlags.map((flag) => (
+              <li key={`${flag.category}-${flag.term}`}>
+                <strong>{flag.term}</strong>{' '}
+                <span className="small">{factualityCategoryLabel(flag.category)}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="small">
+            This short check cannot catch every inference. Read the whole draft before you approve.
+          </p>
+        </div>
+      )}
 
       <div className="card">
         <h2>Built from your notes</h2>

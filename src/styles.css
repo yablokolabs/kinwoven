@@ -1634,6 +1634,27 @@ input[type='checkbox']:checked {
   }
 }
 
+/* A review aid for model drafts, not a second primary action. */
+.notice-review {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-left-color: var(--clay);
+}
+
+.notice-review .plain-list {
+  gap: 4px;
+}
+
+.notice-review .plain-list .small {
+  display: inline;
+  margin-left: 4px;
+}
+
+.notice-review > .small {
+  margin: 0;
+}
+
 /* =======================================================================
    2026 twilight layer
    A darker, more spatial reading of the soft-tech skin: deep plum space,
